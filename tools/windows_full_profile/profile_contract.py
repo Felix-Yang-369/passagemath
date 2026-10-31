@@ -114,17 +114,18 @@ def provider_wheel_tags(path,arch):
         if len(records)!=1:raise ValueError('Ambiguous wheel metadata')
         tags=re.findall(r'^Tag: (.+)$',wheel.read(records[0]).decode('utf-8').replace('\r',''),re.M)
     suffix='win_amd64' if arch=='x64' else 'win_arm64'
-    def supported(tag):
-        fields=tag.split('-')
-        if len(fields)!=3:return False
-        python,abi,platform=fields
-        if platform not in ('any',suffix):return False
-        if abi=='abi3':
-            return bool(re.fullmatch(r'cp3[0-9]+',python)) and 2<=int(python[3:])<=12
-        if abi=='cp312':return python=='cp312' and platform==suffix
-        if abi!='none':return False
-        return all(part in ('py3','cp312') or (bool(re.fullmatch(r'py3[0-9]+',part)) and int(part[3:])<=12) or part=='py2' and 'py3' in python.split('.') for part in python.split('.'))
-    if not tags or not all(supported(tag) for tag in tags):
+    try:
+        from packaging.tags import cpython_tags,compatible_tags,parse_tag
+    except ImportError:
+        from pip._vendor.packaging.tags import cpython_tags,compatible_tags,parse_tag
+    # Each WHEEL Tag is an alternative, including separately expanded py2/py3
+    # entries. Use PyPA's CPython3.12 target tags while retaining the explicit
+    # same-platform boundary that rejects the mislabeled pkgconf wheel.
+    declared=set()
+    for tag in tags:declared.update(parse_tag(tag))
+    supported=set(cpython_tags(python_version=(3,12),platforms=[suffix]))
+    supported.update(compatible_tags(python_version=(3,12),interpreter='cp312',platforms=[suffix]))
+    if not declared or any(tag.platform not in ('any',suffix) for tag in declared) or not declared.intersection(supported):
         raise ValueError('Third-party wheel internal platform mismatch '+Path(path).name)
     return tags
 

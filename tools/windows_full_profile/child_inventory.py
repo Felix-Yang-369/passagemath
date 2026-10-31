@@ -19,6 +19,14 @@ import sys
 
 def digest(data):return hashlib.sha256(data).hexdigest()
 def canonical(name):return re.sub(r'[-_.]+','-',name).lower()
+
+def native_consumption_contract(package,imports,contract_sha256,loaded_count,require_bash=False):
+    assert type(loaded_count) is int and loaded_count>=0
+    assert type(require_bash) is bool
+    original=(package=='glpk' and imports==['sage.libs.glpk'] and contract_sha256=='88eef253884e879e6c1f81aa19214ea471b5a845b367bfb4cf4a6f99c0fa4eef' and not require_bash)
+    assert original or (package!='glpk' and contract_sha256 is None), 'Only the exact immutable original GLPK namespace-import contract is exempt from native consumption'
+    assert original or loaded_count>0, 'Mathematical suite environment did not load a rebuilt native owner'
+    return {'original_import_only':original,'original_contract_sha256':contract_sha256,'cold_original_namespace':original and loaded_count==0,'candidate_native_consumer_required':not original,'candidate_native_consumer_loaded':loaded_count>0,'mathematical_acceptance_claimed':False,'mathematical_tests_executed':False}
 def windows_system_roots(windows):return [(Path(windows)/name).resolve() for name in ('System32','SysWOW64','WinSxS','SystemArm32')]
 def declared_windows_system_path(path,windows):return any(Path(path).resolve().is_relative_to(folder) for folder in windows_system_roots(windows))
 def verify_public_modules_types(site,expected,records,modules_installed):
@@ -27,30 +35,64 @@ def verify_public_modules_types(site,expected,records,modules_installed):
     assert expected and path.is_file() and digest(path.read_bytes())==expected and str(path.resolve()).casefold() in records
     return True
 
-def verify_complete_installed_candidates(site,manifests,installed,records):
-    site=Path(site);by_name={canonical(row['name']):row for row in installed};verified=[];transformed=[]
+def verify_complete_installed_candidates(site,manifests,installed,records,prefix=None):
+    from pathlib import PurePosixPath
+    def reject_links(path):
+        path=Path(path)
+        for component in (path,*path.parents):
+            if component.is_symlink() or (hasattr(component,'is_junction') and component.is_junction()):raise AssertionError('Linked normal installation path '+str(component))
+    raw_site=Path(site).absolute();raw_prefix=Path(prefix).absolute() if prefix is not None else raw_site.parent.parent
+    reject_links(raw_site);reject_links(raw_prefix)
+    site=raw_site.resolve();prefix=raw_prefix.resolve()
+    assert site.is_relative_to(prefix),'Installed site is outside the declared normal prefix'
+    by_name={canonical(row['name']):row for row in installed};verified=[];transformed=[];relocated=[];schemes={}
+    assert len(by_name)==len(installed),'Duplicate installed distribution identities'
+    seen_distributions=set()
     for manifest in manifests:
         name=canonical(Path(manifest['path']).name.split('-')[0])
         if name not in by_name:continue
-        count=0
+        if name in seen_distributions:raise AssertionError('Duplicate installed candidate wheel identity '+name)
+        seen_distributions.add(name);count=0;seen_members=set();seen_paths=set()
         for row in manifest['files']:
-            relative=row['name'];parts=relative.split('/')
+            relative=row['name'];parsed=PurePosixPath(relative);parts=relative.split('/')
+            if not relative or '\\' in relative or ':' in relative or parsed.is_absolute() or '..' in parsed.parts or str(parsed)!=relative:raise AssertionError('Unsafe/noncanonical wheel installation member '+relative)
+            if relative.casefold() in seen_members:raise AssertionError('Duplicate/case-colliding wheel installation member '+relative)
+            seen_members.add(relative.casefold())
+            if type(row.get('bytes')) is not int or row['bytes']<0:raise AssertionError('Non-integer wheel member length '+relative)
+            target_root=site;classification=None
             if relative.endswith('.dist-info/RECORD'):
                 transformed.append({'distribution':name,'wheel_member':relative,'classification':'pip regenerates installed RECORD; complete actual installed RECORD is verified independently'});continue
             if parts[0].endswith('.data'):
-                if len(parts)>2 and parts[1] in ('purelib','platlib'):relative='/'.join(parts[2:])
+                if len(parts)>2 and parts[1] in ('purelib','platlib'):
+                    relative='/'.join(parts[2:]);classification='normal pip '+parts[1]+' relocation to site'
+                elif len(parts)>2 and parts[1]=='data':
+                    relative='/'.join(parts[2:]);target_root=prefix;classification='normal pip data relocation to actual prefix'
+                elif len(parts)>2 and parts[1]=='headers':
+                    from pip._internal.locations import get_scheme
+                    pip_version=importlib.metadata.version('pip')
+                    if pip_version!='26.2.2':raise AssertionError('Unreviewed pip headers scheme version '+pip_version)
+                    if name not in schemes:
+                        normal=get_scheme(name) if prefix==Path(sys.prefix).resolve() else get_scheme(name,prefix=str(prefix))
+                        reject_links(Path(normal.headers).absolute());headers=Path(normal.headers).resolve()
+                        if not headers.is_relative_to(prefix):raise AssertionError('Normal pip headers scheme escapes actual prefix')
+                        schemes[name]={'pip_version':pip_version,'headers':str(headers),'prefix':str(prefix),'normal_get_scheme_provider':get_scheme.__module__}
+                    relative='/'.join(parts[2:]);target_root=Path(schemes[name]['headers']);classification='normal pinned pip headers installation scheme'
                 elif len(parts)>2 and parts[1]=='scripts':
                     transformed.append({'distribution':name,'wheel_member':relative,'classification':'normal pip script installation; actual mathematical launcher separately requires installed RECORD/PE/native-Python shebang'});continue
                 else:raise AssertionError('Unclassified installed wheel relocation '+row['name'])
-            path=(site/relative).resolve();key=str(path).casefold()
-            if not path.is_relative_to(site.resolve()) or not path.is_file() or key not in records or records[key]['sha256']!=row['sha256'] or digest(path.read_bytes())!=row['sha256'] or path.stat().st_size!=row['bytes']:raise AssertionError('Installed candidate wheel member/RECORD missing or changed '+name+':'+relative)
+            unresolved=target_root/relative;reject_links(unresolved);path=unresolved.resolve();key=str(path).casefold()
+            if key in seen_paths:raise AssertionError('Duplicate normal installed destination '+str(path))
+            seen_paths.add(key)
+            if not path.is_relative_to(target_root) or not path.is_relative_to(prefix) or not path.is_file() or path.is_symlink() or key not in records or records[key]['sha256']!=row['sha256'] or digest(path.read_bytes())!=row['sha256'] or path.stat().st_size!=row['bytes']:raise AssertionError('Installed candidate wheel member/RECORD missing or changed '+name+':'+relative)
+            if classification:relocated.append({'distribution':name,'wheel_member':row['name'],'installed_path':str(path),'installed_root':str(target_root),'sha256':row['sha256'],'classification':classification})
             count+=1
         verified.append({'distribution':name,'wheel_sha256':manifest['sha256'],'required_original_wheel_members_verified':count})
     for path in (site/'sage').rglob('*'):
+        if path.is_symlink() or (hasattr(path,'is_junction') and path.is_junction()):raise AssertionError('Linked actual installed Sage namespace member '+str(path))
         if path.is_file() and path.suffix.lower() in ('.py','.pyx','.pxd','.pxi','.pyd','.dll','.h'):
             key=str(path.resolve()).casefold()
             if path.is_symlink() or key not in records or records[key]['sha256']!=digest(path.read_bytes()):raise AssertionError('Unrecorded actual installed Sage source/native file '+str(path))
-    return {'passed':True,'installed_candidates':verified,'normal_transformed_installation_members':transformed,'actual_Sage_namespace_code_scan_complete':True}
+    return {'passed':True,'installed_candidates':verified,'normal_transformed_installation_members':transformed,'normal_relocated_installation_members':relocated,'pinned_pip_header_schemes':schemes,'actual_prefix':str(prefix),'actual_site':str(site),'actual_Sage_namespace_code_scan_complete':True}
 
 def declared_dependency_graph(distributions,package):
     try:from packaging.requirements import Requirement
@@ -74,7 +116,7 @@ def declared_dependency_graph(distributions,package):
             pending.append((dependency,''));pending.extend((dependency,e) for e in requirement.extras)
     return {name for name,extra in visited},edges
 def main():
-    ap=argparse.ArgumentParser();ap.add_argument('--package',required=True);ap.add_argument('--import-module',action='append',required=True);ap.add_argument('--wheel-manifests',type=Path,required=True);ap.add_argument('--provider-manifest',type=Path,required=True);ap.add_argument('--machine',required=True);ap.add_argument('--require-bash-resolution',action='store_true');ap.add_argument('--output',type=Path,required=True);args=ap.parse_args()
+    ap=argparse.ArgumentParser();ap.add_argument('--package',required=True);ap.add_argument('--import-module',action='append',required=True);ap.add_argument('--wheel-manifests',type=Path,required=True);ap.add_argument('--provider-manifest',type=Path,required=True);ap.add_argument('--machine',required=True);ap.add_argument('--require-bash-resolution',action='store_true');ap.add_argument('--original-import-only-contract-sha256');ap.add_argument('--output',type=Path,required=True);args=ap.parse_args()
     assert sys.platform=='win32'
     prefix=Path(sys.prefix).resolve();base=Path(sys.base_prefix).resolve();site=(prefix/'Lib/site-packages').resolve()
     assert prefix!=base and sys.version_info[:3]==(3,12,10)
@@ -123,7 +165,7 @@ def main():
                     records[key]['provider_class']='original_declared_test_dependency'
                     external_sources.append({'distribution':name,'version':version,'relative_site_path':local,'sha256':digest256,'bytes':len(data)})
         installed.append({'name':name,'version':version,'RECORD_sha256':digest(text.encode()),'verified_hashed_record_files':count,'original_declared_dependency':canonical(name) in reachable,'provider_class':'candidate_owner' if canonical(name) in candidate_owners else 'original_declared_test_dependency' if canonical(name) in reachable else 'venv_tooling'})
-    installed_complete=verify_complete_installed_candidates(site,manifests,installed,records)
+    installed_complete=verify_complete_installed_candidates(site,manifests,installed,records,prefix=prefix)
     imported=[]
     for name in args.import_module:
         module=importlib.import_module(name);module_path=Path(module.__file__).resolve();module_key=str(module_path).casefold();assert module_path.is_relative_to(site) and module_key in records and records[module_key]['sha256']==digest(module_path.read_bytes())
@@ -167,10 +209,11 @@ def main():
             kind='base_CPython' if path.is_relative_to(base) else 'declared_SDK' if path.is_relative_to(sdk) else 'normal_MSYS2_runtime'
         else:raise AssertionError('Loaded native provider outside all declared roots: '+str(path))
         loaded.append({'path':str(path),'relative_site_path':relative,'sha256':value,'pe_machine':hex(machine),'provider_class':kind})
-    assert sage_native>0
+    consumption=native_consumption_contract(args.package,args.import_module,args.original_import_only_contract_sha256,sage_native,args.require_bash_resolution)
     source_lock=digest(json.dumps({'installed':installed,'external_sources':external_sources,'dependency_edges':dependency_edges,'installed_native':installed_native},sort_keys=True).encode())
     result={'passed':True,'package':args.package,'python':sys.executable,'version':sys.version,'machine':platform.machine(),'process_machine':process_machine.value,'native_machine':hex(native_machine.value),'emulation':False,'emulation_scope':'This actual mathematical/import-only tox CPython process, not auxiliary Bash/Git executables. Every loaded non-OS provider and candidate wheel PE also has the exact native target machine.','prefix':str(prefix),'base_prefix':str(base),'imported_original_contract_modules':imported,'sys_path':sys.path,'effective_env':{key:os.environ.get(key) for key in ('HOME','SAGE_DOC','KNOWN_TEST_FAILURES','SAGE_LOCAL','DOT_SAGE','PATH','INCLUDE','LIB')},'runtime_cliquer_path':str(expected_cl),'installed_distributions_RECORD_verified':installed,'original_declared_dependency_edges':dependency_edges,'original_declared_test_dependency_source_files':external_sources,'installed_distribution_source_lock_sha256':source_lock,'complete_loaded_native_inventory':loaded,'loaded_rebuilt_owner_files':sage_native,'modules_distribution_present':modules_installed,'public_modules_types_matches_wheel_source_RECORD':types_verified,'public_types_expected_sha256':expected_types,'scope':'Actual effective tox environment before complete mathematical tests; no source overlay'}
     result['all_installed_native_PE_files']=installed_native
+    result['native_consumption_contract']=consumption
     result['declared_OS_system_subtrees']=[str(p) for p in os_roots]
     result['complete_installed_candidate_wheel_members']=installed_complete
     if args.require_bash_resolution:

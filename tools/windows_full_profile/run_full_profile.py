@@ -31,6 +31,17 @@ def utc():return datetime.now(timezone.utc).isoformat()
 def save(path,value):Path(path).write_text(json.dumps(value,indent=2,ensure_ascii=True)+'\n',encoding='utf-8')
 def file_record(path):path=Path(path);return {'path':str(path),'bytes':path.stat().st_size,'sha256':sha(path)}
 def pe_record(path,role):return dict(file_record(path),pe_machine=hex(pe_machine(Path(path).read_bytes())),role=role)
+
+def independent_post_provenance(targets,verifier):
+    outcomes=[]
+    for target in targets:
+        try:
+            proof=verifier(target)
+            if proof.get('passed') is not True:raise ValueError('Post provenance did not provide a strict successful proof')
+            outcomes.append({'environment':target['environment'],'passed':True,'proof':proof})
+        except Exception as error:
+            outcomes.append({'environment':target['environment'],'passed':False,'error':str(error),'error_type':type(error).__name__})
+    return outcomes
 def decoded_members(descriptor):
     if isinstance(descriptor,list):return descriptor
     pieces=[]
@@ -367,26 +378,41 @@ def main():
             test_env=dict(runtime_env);test_env.pop('PIP_NO_INDEX',None)
             test_env.update({'PIP_FIND_LINKS':str(wheelhouse)+' '+str(tools),'PIP_CONSTRAINT':str(constraints),'PIP_BUILD_CONSTRAINT':str(constraints),'SAGE_DOCTEST_OPTIONS':'--verbose'})
             setup_env=dict(test_env);setup_env['PATH']=env['PATH']
+            post_targets=[]
             try:
                 listed=run(package+'-original-tox-list',[py,'-I','-B','-m','tox','-l','-q'],setup_env,cwd)
                 listed_text=Path(listed['stdout']['path']).read_text(encoding='utf-8',errors='replace')
                 envs=[re.sub(r'sagepython-.*nopypi-norequirements','py312-norequirements',line.strip()) for line in listed_text.splitlines() if line.strip()]
                 if envs!=['py312-norequirements-notest','py312-norequirements']:raise ValueError('Original complete tox environment contract differs')
                 run(package+'-normal-tox-install-before-math',[py,'-I','-B','-m','tox','-v','-v','--notest','-e',','.join(envs),'--installpkg',wheel],setup_env,cwd,timeout=1800)
+                # virtualenv's seeded pip RECORD can list absent .pyc files and
+                # cache directories under -B. Install the same verified normal
+                # pip wheel without compiling caches, then retain the original
+                # strict complete RECORD/member gate for every distribution.
+                pip_version=next(pin.split('==',1)[1] for pin in pins['third_party_build_pins'] if pin.startswith('pip=='))
+                pip_wheels=list(tools.glob('pip-'+pip_version+'-*.whl'))
+                if len(pip_wheels)!=1:raise ValueError('Exactly one verified same-version pip tool wheel required')
+                for original_env in envs:
+                    pip_identity='from importlib.metadata import version;value=version("pip");assert value=='+repr(pip_version)+';print("ORIGINAL_SEEDED_PIP_VERSION",value)'
+                    run(package+'-'+original_env+'-same-pip-version',[py,'-I','-B','-m','tox','exec','-e',original_env,'--','python','-I','-B','-c',pip_identity],test_env,cwd,timeout=600)
+                    run(package+'-'+original_env+'-normal-pip-record',[py,'-I','-B','-m','tox','exec','-e',original_env,'--','python','-I','-B','-m','pip','install','--no-index','--no-deps','--no-compile','--force-reinstall',pip_wheels[0]],test_env,cwd,timeout=600)
                 run(package+'-original-effective-tox-config',[py,'-I','-B','-m','tox','config','-e','py312-norequirements','-k','commands','set_env','pass_env'],test_env,cwd)
                 probe_path=root/(package+'-PRE_PROVENANCE.json')
                 probe_command=[py,'-I','-B','-m','tox','exec','-e','py312-norequirements','--','python','-I','-B',HERE/'child_inventory.py','--package',package,'--wheel-manifests',wheel_manifests_path,'--provider-manifest',provider_path,'--machine',identity['native_machine'],'--output',probe_path]
                 import_args=[]
                 for name in contract['imports']:import_args.extend(['--import-module',name])
+                if contract['test_kind']=='import-only':import_args.extend(['--original-import-only-contract-sha256',contract['source_sha256']])
                 probe_command=probe_command[:-2]+import_args+probe_command[-2:]
                 run(package+'-effective-tox-pretest-provenance',probe_command,test_env,cwd,timeout=600)
                 pre=json.loads(probe_path.read_text())
                 if pre.get('passed') is not True:raise ValueError('Pretest effective tox provenance failed')
+                post_targets.append({'environment':'py312-norequirements','command':probe_command,'before':pre,'path':root/(package+'-POST_PROVENANCE.json'),'run_name':package+'-effective-tox-posttest-provenance'})
                 notest_probe=None;notest_pre=None
                 if contract['test_kind']=='import-only':
                     notest_path=root/(package+'-NOTEST_PRE_PROVENANCE.json');notest_probe=list(probe_command);notest_probe[notest_probe.index('-e')+1]='py312-norequirements-notest';notest_probe[-1]=notest_path
                     run(package+'-original-notest-import-pre-provenance',notest_probe,test_env,cwd,timeout=600);notest_pre=json.loads(notest_path.read_text())
                     if notest_pre.get('passed') is not True:raise ValueError('Original import-only notest environment provenance failed')
+                    post_targets.append({'environment':'py312-norequirements-notest','command':notest_probe,'before':notest_pre,'path':root/(package+'-NOTEST_POST_PROVENANCE.json'),'run_name':package+'-original-notest-import-post-provenance'})
                 record['provenance_passed']=True
                 selected=None;stats_path=None
                 if contract['test_kind']=='mathematics':
@@ -419,18 +445,20 @@ def main():
                     save(root/(package+'-ACTUAL_UNIT_READBACK.json'),unit_result);record['units_matched']=unit_result['passed'];record['reported_tests']=unit_result['reported_tests'];record['preexisting_known_failure_units']=unit_result['known_failure_count']
                 if not clean_execution:record['units_matched']=False
                 record['skip_count']=None;record['skip_count_availability']='Raw original verbose skip output retained; no fabricated zero count'
-                post_path=root/(package+'-POST_PROVENANCE.json');post_command=list(probe_command);post_command[-1]=post_path
-                run(package+'-effective-tox-posttest-provenance',post_command,test_env,cwd,timeout=600)
-                post=json.loads(post_path.read_text())
-                if post.get('passed') is not True or pre['public_types_expected_sha256']!=post['public_types_expected_sha256'] or pre['installed_distribution_source_lock_sha256']!=post['installed_distribution_source_lock_sha256']:raise ValueError('Posttest installed provenance/source lock failed')
-                if notest_probe is not None:
-                    notest_post_path=root/(package+'-NOTEST_POST_PROVENANCE.json');notest_post_command=list(notest_probe);notest_post_command[-1]=notest_post_path
-                    run(package+'-original-notest-import-post-provenance',notest_post_command,test_env,cwd,timeout=600);notest_post=json.loads(notest_post_path.read_text())
-                    if notest_post.get('passed') is not True or notest_pre['installed_distribution_source_lock_sha256']!=notest_post['installed_distribution_source_lock_sha256']:raise ValueError('Original import-only notest post-provenance/source lock failed')
-                    record['both_original_import_envs_provenance']=True
                 if 'Error in doctesting framework' in text or re.search(r'Unhandled SIG|SIGSEGV|Process died|Timed out',text):record['units_matched']=False
             except Exception as error:
                 record.update({'error':str(error),'error_type':type(error).__name__,'last_actual_command':receipts[-1] if receipts else None,'provenance_passed':False,'units_matched':False})
+            finally:
+                def verify_post(target):
+                    command=list(target['command']);command[-1]=target['path']
+                    run(target['run_name'],command,test_env,cwd,timeout=600)
+                    post=json.loads(target['path'].read_text());before=target['before']
+                    if post.get('passed') is not True or before['public_types_expected_sha256']!=post['public_types_expected_sha256'] or before['installed_distribution_source_lock_sha256']!=post['installed_distribution_source_lock_sha256']:raise ValueError('Posttest installed provenance/source lock failed')
+                    return {'passed':True,'post_file':file_record(target['path']),'installed_distribution_source_lock_sha256':post['installed_distribution_source_lock_sha256']}
+                outcomes=independent_post_provenance(post_targets,verify_post)
+                record['post_provenance_attempts']=outcomes
+                if any(row['passed'] is not True for row in outcomes):record.update({'provenance_passed':False,'units_matched':False,'post_provenance_errors':[row for row in outcomes if row['passed'] is not True]})
+                if contract['test_kind']=='import-only':record['both_original_import_envs_provenance']=len(outcomes)==2 and all(row['passed'] is True for row in outcomes)
             tests.append(record);save(root/'TEST_RESULTS.json',tests)
         result=complete_result(builds,tests);result.update({'identity':identity,'pr':args.pr,'arch':args.arch,'original_merge_sha':source_commit,'same_vm_ephemeral_wheelhouse':True,'artifact_uploads':0,'actions_cache_writes':0,'binary_delivery':False,'native_sdk_rebuilt_from_source':False,'old_sdk_basis_plus_normal_source_fixed_homfly_and_source_fixed_import_library':True})
     except BaseException as error:
