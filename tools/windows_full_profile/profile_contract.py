@@ -70,6 +70,12 @@ def pe_machine(data):
     if data[offset:offset+4]!=b'PE\0\0':raise ValueError('Missing PE signature')
     return struct.unpack_from('<H',data,offset+4)[0]
 
+def root_wheel_metadata_name(wheel,leaf):
+    if leaf not in ('WHEEL','METADATA','RECORD'):raise ValueError('Unknown wheel metadata leaf')
+    names=[member.filename for member in wheel.infolist() if len(PurePosixPath(member.filename).parts)==2 and PurePosixPath(member.filename).parts[0].endswith('.dist-info') and PurePosixPath(member.filename).name==leaf and not member.is_dir()]
+    if len(names)!=1:raise ValueError('Ambiguous/missing root '+leaf+' metadata in '+str(wheel.filename))
+    return names[0]
+
 def wheel_inventory(path,arch,discovered_extensions=None,require_native=True):
     expected={'x64':0x8664,'arm64':0xaa64}[arch]
     native=[];files=[];extension_modules=set()
@@ -90,9 +96,7 @@ def wheel_inventory(path,arch,discovered_extensions=None,require_native=True):
                 if machine!=expected:raise ValueError('Wrong PE architecture '+member.filename)
                 row=dict(row,pe_machine=hex(machine));native.append(row)
                 if member.filename.endswith('.pyd'):extension_modules.add(member.filename.split('.')[0])
-        record_names=[n for n in content if n.endswith('.dist-info/RECORD')]
-        if len(record_names)!=1:raise ValueError('Exactly one wheel RECORD required')
-        record_name=record_names[0];records=set()
+        record_name=root_wheel_metadata_name(wheel,'RECORD');records=set()
         for name,digest,size in csv.reader(io.StringIO(content[record_name].decode('utf-8'))):
             if name in records or name not in content:raise ValueError('Duplicate/missing wheel RECORD file')
             records.add(name);data=content[name]
@@ -110,9 +114,8 @@ def wheel_inventory(path,arch,discovered_extensions=None,require_native=True):
 
 def provider_wheel_tags(path,arch):
     with zipfile.ZipFile(path) as wheel:
-        records=[n for n in wheel.namelist() if n.endswith('.dist-info/WHEEL')]
-        if len(records)!=1:raise ValueError('Ambiguous wheel metadata')
-        tags=re.findall(r'^Tag: (.+)$',wheel.read(records[0]).decode('utf-8').replace('\r',''),re.M)
+        metadata_name=root_wheel_metadata_name(wheel,'WHEEL')
+        tags=re.findall(r'^Tag: (.+)$',wheel.read(metadata_name).decode('utf-8').replace('\r',''),re.M)
     suffix='win_amd64' if arch=='x64' else 'win_arm64'
     try:
         from packaging.tags import cpython_tags,compatible_tags,parse_tag
@@ -151,14 +154,35 @@ def require_valid_import_library(path):
 
 def complete_result(builds,tests):
     build_names=[r['package'] for r in builds];test_names=[r['package'] for r in tests]
+    environments=[dict(environment,package=row['package']) for row in tests for environment in row.get('environments',[])]
     strict_zero=lambda x:type(x) is int and x==0
     positive=lambda x:type(x) is int and x>0
     def actual_scope(row):
         if row.get('test_kind')=='import-only':
             return row.get('package')=='glpk' and row.get('original_contract_sha256')=='88eef253884e879e6c1f81aa19214ea471b5a845b367bfb4cf4a6f99c0fa4eef' and type(row.get('reported_tests')) is int and row['reported_tests']==0 and row.get('units_matched') is True and row.get('summary_seen') is True and row.get('both_original_import_envs_provenance') is True
         return row.get('summary_seen') is True and positive(row.get('reported_tests')) and row.get('units_matched') is True
+    def environment_scope(row):
+        common=(row.get('summary_seen') is True and row.get('units_matched') is True
+                and row.get('actual_original_commands_complete') is True
+                and type(row.get('actual_test_command_count')) is int
+                and type(row.get('source_effective_command_count')) is int
+                and row['actual_test_command_count']==row['source_effective_command_count']>=0)
+        if row.get('kind')=='mathematics':
+            return (common and positive(row.get('reported_tests'))
+                    and row.get('original_bash_native_launcher_proven') is True
+                    and row['actual_test_command_count']>0)
+        return (common and type(row.get('reported_tests')) is int and row['reported_tests']==0
+                and row.get('mathematical_acceptance_claimed') is False)
     checks={'exact_16_owners':len(build_names)==len(OWNERS) and set(build_names)==set(OWNERS),'exact_14_full_tox_jobs':len(test_names)==len(TEST_OWNERS) and set(test_names)==set(TEST_OWNERS),'exact_13_math_plus_original_glpk_import_only':all((r.get('test_kind')=='import-only' if r['package']=='glpk' else r.get('test_kind')=='mathematics') for r in tests),'all_normal_owner_builds_exit0':all(strict_zero(r.get('exit')) and r.get('accepted') is True for r in builds),'all_original_full_tox_exit0':all(strict_zero(r.get('exit')) for r in tests),'actual_original_test_scopes':all(actual_scope(r) for r in tests),'native_installed_provenance':all(r.get('provenance_passed') is True for r in tests)}
-    return {'passed':all(checks.values()),'checks':checks,'builds':builds,'tests':tests,'original_upstream_jobs_rerun':False,'scope':'Original Windows modular profile: 16 owners and 14 original full tox jobs, comprising 13 mathematics suites and one GLPK import-only job; not an all-Sage native Windows port'}
+    checks.update({'exact_32_original_environments':len(environments)==32 and len({(r['package'],r['name']) for r in environments})==32,
+                   'exact_17_original_mathematical_environments':sum(r.get('kind')=='mathematics' for r in environments)==17,
+                   'all_original_environment_scopes_bound':all(row.get('complete_original_environment_scope') is True for row in tests),
+                   'all_32_have_actual_results':len(environments)==32 and all(r.get('state')=='executed' and type(r.get('exit')) is int for r in environments),
+                   'all_32_actual_results_exit0':len(environments)==32 and all(strict_zero(r.get('exit')) for r in environments),
+                   'all_32_source_provenance_and_acceptance':len(environments)==32 and all(r.get('accepted') is True and r.get('pre_provenance_passed') is True and r.get('post_provenance_passed') is True for r in environments),
+                   'every_environment_has_actual_original_scope_evidence':len(environments)==32 and all(environment_scope(r) for r in environments),
+                   'all_original_factor_baselines_unchanged':all(row.get('fixtures_closing',{}).get('passed') is True for row in tests)})
+    return {'passed':all(checks.values()),'checks':checks,'builds':builds,'tests':tests,'original_upstream_jobs_rerun':False,'scope':'Original Windows modular profile: 16 owners and 14 complete original tox jobs, comprising all 32 declared environments and 17 mathematical phases; not an all-Sage native Windows port'}
 
 def original_tox_contract(body,package):
     section=body.split('[testenv]',1)[1].split('\n[testenv:',1)[0]
@@ -170,7 +194,7 @@ def original_tox_contract(body,package):
     digest=hashlib.sha256(body.encode('utf-8')).hexdigest()
     if math is None:
         if package!='glpk' or digest!='88eef253884e879e6c1f81aa19214ea471b5a845b367bfb4cf4a6f99c0fa4eef' or imports!=['sage.libs.glpk']:raise ValueError('Undeclared import-only original contract')
-        return {'package':package,'test_kind':'import-only','source_sha256':digest,'active_commands':active,'imports':imports,'mathematical_tests':0,'targets':[],'environment':None}
+        return {'package':package,'test_kind':'import-only','source_sha256':digest,'active_commands':active,'imports':imports,'mathematical_tests':0,'targets':[],'environment':None,'source_environments':original_source_tox_environments(body),'environment_targets':original_environment_targets(body,package)}
     environment=re.search(r'--environment(?:=|\s+)([^\s]+)',math).group(1)
     if environment not in imports:imports.append(environment)
     positional=re.search(r'\{posargs:([^}]+)\}',math)
@@ -178,7 +202,110 @@ def original_tox_contract(body,package):
     else:targets=[token.rstrip("'\"") for token in math.split() if token.startswith(('sage/','./sage/')) or token=='--installed']
     if not targets:raise ValueError('Original mathematical targets missing')
     optional=re.search(r'--optional=([^\s]+)',math)
-    return {'package':package,'test_kind':'mathematics','source_sha256':digest,'active_commands':active,'imports':list(dict.fromkeys(imports)),'environment':environment,'targets':targets,'probe_all':bool(re.search(r'--probe\s+all(?:\s|$)',math)),'optional':optional.group(1) if optional else None,'initial':'--initial' in math,'force_lib':'--force-lib' in math,'installed':'--installed' in targets}
+    return {'package':package,'test_kind':'mathematics','source_sha256':digest,'active_commands':active,'imports':list(dict.fromkeys(imports)),'environment':environment,'targets':targets,'probe_all':bool(re.search(r'--probe\s+all(?:\s|$)',math)),'optional':optional.group(1) if optional else None,'initial':'--initial' in math,'force_lib':'--force-lib' in math,'installed':'--installed' in targets,'source_environments':original_source_tox_environments(body),'environment_targets':original_environment_targets(body,package)}
+
+def original_source_tox_environments(body):
+    """Literal original envlist and the exact original Windows sed conversion."""
+    import configparser
+    config=configparser.ConfigParser(interpolation=None,strict=True);config.read_string(body)
+    source=[]
+    for line in config.get('tox','envlist').splitlines():
+        value=line.split('#',1)[0].strip()
+        if not value:continue
+        if not re.fullmatch(r'sagepython-sagewheels-nopypi-norequirements(?:-[a-z0-9]+)*',value):raise ValueError('Unsupported original envlist entry '+value)
+        source.append(value)
+    if not source or len(source)!=len(set(source)):raise ValueError('Empty/duplicate original tox envlist')
+    mapped=[re.sub(r'sagepython-.*nopypi-norequirements','py312-norequirements',name) for name in source]
+    if len(mapped)!=len(set(mapped)):raise ValueError('Original sed conversion collides')
+    return [{'original':a,'name':b} for a,b in zip(source,mapped)]
+
+def source_requested_extras(body,original_environment):
+    """Resolve the simple factor expressions actually used by these source files."""
+    import configparser
+    config=configparser.ConfigParser(interpolation=None,strict=True);config.read_string(body)
+    factors=set(original_environment.split('-'));values=[]
+    for line in config.get('testenv','extras',fallback='').splitlines():
+        line=line.split('#',1)[0].strip()
+        if not line:continue
+        if ':' in line:
+            condition,line=line.split(':',1);alternatives=condition.split(',');include=False
+            for alternative in alternatives:
+                terms=alternative.strip().split('-')
+                if not all(re.fullmatch(r'!?[a-z0-9_]+',term) for term in terms):raise ValueError('Unsupported original extra factor '+condition)
+                include|=all((term[1:] not in factors) if term.startswith('!') else (term in factors) for term in terms)
+            if not include:continue
+        for extra in line.split():
+            if not re.fullmatch(r'[A-Za-z0-9_-]+',extra):raise ValueError('Unsupported original extra '+extra)
+            values.append(extra.lower().replace('_','-'))
+    if len(values)!=len(set(values)):raise ValueError('Duplicate original extras')
+    return sorted(values)
+
+def original_environment_targets(body,package):
+    return [dict(row,kind='import-only' if package=='glpk' else 'notest' if row['name'].endswith('-notest') else 'mathematics',requested_extras=source_requested_extras(body,row['original'])) for row in original_source_tox_environments(body)]
+
+def source_known_failure_basename(body,original_environment):
+    """Resolve only the baseline template and factor variables in original source."""
+    import configparser
+    config=configparser.ConfigParser(interpolation=None,strict=True);config.read_string(body)
+    factors=set(original_environment.split('-'));assignments={}
+    for raw in config.get('testenv','setenv').splitlines():
+        raw=raw.split('#',1)[0].strip()
+        if not raw or '=' not in raw:continue
+        left,value=raw.split('=',1);left=left.strip();value=value.strip()
+        if ':' in left:
+            condition,key=left.rsplit(':',1);include=False
+            for alternative in condition.split(','):
+                terms=alternative.strip().split('-')
+                if not all(re.fullmatch(r'!?[a-z0-9_]+',term) for term in terms):raise ValueError('Unsupported baseline factor '+condition)
+                include|=all((term[1:] not in factors) if term.startswith('!') else term in factors for term in terms)
+            if not include:continue
+            left=key.strip()
+        if not re.fullmatch(r'[A-Za-z_][A-Za-z0-9_]*',left):raise ValueError('Unsupported source environment assignment')
+        assignments[left]=value
+    template=assignments.get('KNOWN_TEST_FAILURES')
+    if template is None or not template.startswith(('{toxinidir}/','{toxinidir}\\')):raise ValueError('Original baseline template is not rooted in its source configuration')
+    suffix=template[len('{toxinidir}'):].lstrip('/\\')
+    def replace(match):
+        name=match.group(1);value=assignments.get(name,match.group(2) or '')
+        if value and not re.fullmatch(r'--[a-z0-9_-]+',value):raise ValueError('Original baseline factor value is not a literal suffix')
+        return value
+    suffix=re.sub(r'\{env:([A-Za-z_][A-Za-z0-9_]*)(?::([^}]*))?\}',replace,suffix)
+    if not re.fullmatch(r'known-test-failures(?:--[a-z0-9_-]+)?\.json',suffix):raise ValueError('Unresolved/escaping original baseline suffix')
+    return suffix
+
+def resolved_original_tox_matrix(body,package,listed_text,effective,config_directory,work_directory):
+    """Bind normal tox JSON resolution to all literal original environments."""
+    source=original_environment_targets(body,package);names=[row['name'] for row in source]
+    listed=[re.sub(r'sagepython-.*nopypi-norequirements','py312-norequirements',line.strip()) for line in listed_text.splitlines() if line.strip()]
+    if listed!=names:raise ValueError('Normal tox -l differs from literal source envlist/sed conversion')
+    environments=effective.get('env')
+    if not isinstance(environments,dict) or set(environments)!=set(names):raise ValueError('Normal effective tox JSON omits/adds original environments')
+    directory=Path(config_directory).resolve();work=Path(work_directory).resolve();result=[];stats=set();contract=original_tox_contract(body,package)
+    for target in source:
+        name=target['name'];actual=environments[name]
+        if actual.get('env_name')!=name:raise ValueError('Effective tox name differs')
+        extras=actual.get('extras');commands=actual.get('commands');env=actual.get('set_env');before_commands=actual.get('commands_pre',[]);after_commands=actual.get('commands_post',[])
+        if not isinstance(extras,list) or any(not isinstance(x,str) for x in extras) or len(extras)!=len(set(extras)) or sorted(x.lower().replace('_','-') for x in extras)!=target['requested_extras']:raise ValueError('Effective extras differ from original source factors '+name)
+        if any(not isinstance(value,list) or any(not isinstance(x,str) for x in value) for value in (commands,before_commands,after_commands)) or not isinstance(env,dict):raise ValueError('Malformed normal effective commands/environment')
+        if before_commands or after_commands:raise ValueError('These immutable original Windows profiles have no pre/post test commands; source contract changed')
+        mathematical=[line for line in commands if 'sage-runtests' in line]
+        if bool(mathematical)!=(target['kind']=='mathematics') or len(mathematical)>1:raise ValueError('Original mathematical/notest/import-only phase differs '+name)
+        prefix=(work/name).resolve();home=Path(env['HOME']).resolve();dot=Path(env['DOT_SAGE']).resolve();known=Path(env['KNOWN_TEST_FAILURES']).resolve()
+        if home!=prefix or Path(env['TOX_ENV_DIR']).resolve()!=prefix or dot!=prefix/'.sage' or env.get('SAGE_DOC')!='/doesnotexist':raise ValueError('Original private environment mapping differs '+name)
+        if dot in stats:raise ValueError('Original environments share mutable Sage statistics')
+        stats.add(dot)
+        expected_known=directory/source_known_failure_basename(body,target['original'])
+        if known!=expected_known:raise ValueError('Effective original baseline differs from exact source factor template '+name)
+        imports=[]
+        for command in commands:
+            for match in re.finditer(r'import\s+(sage\.[A-Za-z0-9_.]+(?:\s*,\s*sage\.[A-Za-z0-9_.]+)*)',command):imports.extend(x.strip() for x in match.group(1).split(','))
+        if mathematical:
+            if contract['environment'] not in imports:imports.append(contract['environment'])
+            found=re.findall(r'--environment(?:=|\s+)([A-Za-z0-9_.]+)',mathematical[0])
+            if found!=[contract['environment']]:raise ValueError('Effective original Sage namespace differs '+name)
+        if package=='glpk' and imports!=['sage.libs.glpk']:raise ValueError('Original GLPK import-only contract differs')
+        result.append(dict(target,imports=list(dict.fromkeys(imports)),prefix=str(prefix),known_failures=str(known),dot_sage=str(dot),commands=commands,commands_pre=before_commands,commands_post=after_commands,effective_set_env=env,original_contract_sha256=contract['source_sha256']))
+    return {'package':package,'source_sha256':contract['source_sha256'],'source_environments':source,'environments':result,'exact_source_envlist_and_sed':True,'normal_effective_commands_extras_and_known_failures':True,'environment_count':len(result),'mathematical_environment_count':sum(row['kind']=='mathematics' for row in result)}
 
 def source_snapshot(source):
     source=Path(source);owned={};generated_metadata={}

@@ -3002,6 +3002,14 @@
       "source_candidate_sha256": "3aa5bd738412d468bf604e4c80208ffeb0e756a69766876eec342511d141d355",
       "root_review": "HIGHS_SOURCE_REVIEW.json",
       "review_approved": true
+    },
+    {
+      "name": "msvc-utf8-source-encoding.patch",
+      "sha256": "1ac8d7ec8f57be437450ac08dcd397fbeb1fe2f6c5f676c2f71b07b908e19818",
+      "source_original_sha256": "740e4c5c24c2a211d7bba9810837ff8bfd0bfd87201b9029a17ec50c2a67ffce",
+      "source_candidate_sha256": "a2c98530492f39d9097a6f24178f118f90ba73049c602de141f557677183b37b",
+      "source_owner": "sagemath-setup",
+      "purpose": "Explicit UTF8 for all normal MSVC C/C++ extension builds"
     }
   ],
   "owned_process_sha256": "d4c0be4d4184b397d3abee350e4d509b94d48fb381b4e9b429012865a1ae78b1",

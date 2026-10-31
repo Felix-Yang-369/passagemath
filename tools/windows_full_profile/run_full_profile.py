@@ -25,7 +25,7 @@ import tomllib
 
 HERE=Path(__file__).resolve().parent
 sys.path.insert(0,str(HERE))
-from profile_contract import OWNERS,TEST_OWNERS,ORIGINAL_EIGHT,sha,safe_name,verify_members,extract_tar,wheel_inventory,provider_wheel_tags,require_valid_import_library,complete_result,source_snapshot,source_closing,compare_units,original_tox_contract,pe_machine
+from profile_contract import OWNERS,TEST_OWNERS,ORIGINAL_EIGHT,sha,safe_name,verify_members,extract_tar,wheel_inventory,provider_wheel_tags,require_valid_import_library,complete_result,source_snapshot,source_closing,compare_units,original_tox_contract,pe_machine,root_wheel_metadata_name
 
 def utc():return datetime.now(timezone.utc).isoformat()
 def save(path,value):Path(path).write_text(json.dumps(value,indent=2,ensure_ascii=True)+'\n',encoding='utf-8')
@@ -81,7 +81,7 @@ def main():
     print('NATIVE_IDENTITY_JSON '+json.dumps(identity),flush=True)
     if sha(HERE/'owned_process.py')!=pins['owned_process_sha256']:raise ValueError('Owned-process helper hash mismatch')
     from owned_process import run_tree
-    receipts=[];builds=[];tests=[];wheel_manifests=[];owner_sources={};source_pins={};fixture_before=None;providers=None;sdk=None;helper_original=None;helper_candidate=None;native_source_ledger=None;candidate_sdk_pins=None
+    receipts=[];builds=[];tests=[];wheel_manifests=[];owner_sources={};source_pins={};fixture_before=None;providers=None;sdk=None;helper_original=None;helper_candidate=None;native_source_ledger=None;candidate_sdk_pins=None;setup_source=None;setup_snapshot=None
 
     def run(name,command,env=None,cwd=root,timeout=1800,strict=True):
         outdir=logs/name;outdir.mkdir()
@@ -118,10 +118,11 @@ def main():
             attempt('original-'+label,lambda label=label,path=path:verify_members(path,decoded_members(lane[label+'_artifact']['members'])))
         for package,snapshot in source_pins.items():attempt('source-'+package,lambda package=package,snapshot=snapshot:source_closing(owner_sources[package],snapshot))
         if native_source_ledger is not None:attempt('normal-native-homfly-source',lambda:source_closing(native_source,native_source_ledger))
+        if setup_source is not None and setup_snapshot is not None:attempt('reviewed-normal-Sage-setup-source',lambda:source_closing(setup_source,setup_snapshot))
         if helper_candidate is not None:attempt('candidate-normal-conversion-helper',lambda:{'passed':sha(helper_candidate)==highspin['source_candidate_sha256']})
         if candidate_sdk_pins is not None:attempt('complete-new-candidate-SDK',lambda:verify_members(sdk,candidate_sdk_pins))
         def fixtures():
-            after={str(p.relative_to(args.checkout)):sha(p) for pattern in ('*/tox.ini','*/known-test-failures.json') for p in (args.checkout/'pkgs').glob(pattern) if p.is_file()}
+            after={str(p.relative_to(args.checkout)):sha(p) for pattern in ('*/tox.ini','*/known-test-failures*.json') for p in (args.checkout/'pkgs').glob(pattern) if p.is_file()}
             return {'passed':fixture_before is not None and fixture_before==after,'before':fixture_before,'after':after}
         attempt('all-original-tox-and-baselines',fixtures)
         for manifest in wheel_manifests:attempt('wheel-'+Path(manifest['path']).name,lambda manifest=manifest:{'passed':Path(manifest['path']).is_file() and sha(Path(manifest['path']))==manifest['sha256']})
@@ -151,7 +152,7 @@ def main():
         run('canonical-immutable-original-source-bytes',['git','-C',str(args.checkout),'-c','core.autocrlf=false','checkout-index','--force','--all'])
         index_entry=run('original-source-index-blob-pins',['git','-C',str(args.checkout),'ls-files','-s'])
         index={line.split('\t',1)[1]:line.split()[1] for line in Path(index_entry['stdout']['path']).read_text(encoding='utf-8').splitlines() if '\t' in line}
-        fixture_paths=[p for pattern in ('*/tox.ini','*/known-test-failures.json') for p in (args.checkout/'pkgs').glob(pattern) if p.is_file()]
+        fixture_paths=[p for pattern in ('*/tox.ini','*/known-test-failures*.json') for p in (args.checkout/'pkgs').glob(pattern) if p.is_file()]
         for path in fixture_paths:
             relative=str(path.relative_to(args.checkout)).replace('\\','/');data=path.read_bytes();blob=hashlib.sha1(b'blob '+str(len(data)).encode()+b'\0'+data).hexdigest()
             if index.get(relative)!=blob:raise ValueError('Original fixture differs from exact immutable Git blob '+relative)
@@ -215,7 +216,7 @@ def main():
             if primary is None:
                 from email import message_from_bytes
                 with zipfile.ZipFile(wheel) as archive:
-                    metadata=message_from_bytes(archive.read(next(n for n in archive.namelist() if n.endswith('.dist-info/METADATA'))))
+                    metadata=message_from_bytes(archive.read(root_wheel_metadata_name(archive,'METADATA')))
                 name=metadata['Name'];version=metadata['Version']
                 if not re.fullmatch(r'[A-Za-z0-9_.-]+',name+version):raise ValueError('Invalid third-party metadata project/version')
                 metadata_url='https://pypi.org/pypi/'+name+'/'+version+'/json'
@@ -232,10 +233,39 @@ def main():
         if memory.name not in primary_files or sha(memory)!=primary_files[memory.name]['sha256']:raise ValueError('Memory allocator source differs from official pinned metadata')
         save(root/'MEMORY_ALLOCATOR_SOURCE.json',dict(file_record(memory),official_primary_file=primary_files[memory.name]))
         for wheel in args.noarch.glob('*.whl'):
+            if wheel.name.startswith('passagemath_setup-'):continue  # Exact old input remains read-only; new source-built provider is unique.
             copied=wheelhouse/wheel.name;shutil.copyfile(wheel,copied)
             wheel_manifests.append(wheel_inventory(copied,args.arch,require_native=False))
         noarch_build=[p for p in wheelhouse.glob('*.whl') if p.name.startswith(('passagemath_setup-','passagemath_environment-','passagemath_repl-','passagemath_sws2rst-'))]
         run('install-original-pure-build-deps',[py,'-I','-B','-m','pip','install','--no-index','--no-deps',*noarch_build],env)
+        setup_spec=json.loads((HERE/'SETUP_SOURCE_PROVIDERS.json').read_text(encoding='utf-8'))
+        setup_pin=next(row for row in setup_spec['public_sources'] if row['pr']==args.pr)
+        setup_archive=args.sdists/setup_pin['sdist_member']
+        if sha(setup_archive)!=setup_pin['sdist_sha256'] or setup_archive.stat().st_size!=setup_pin['sdist_bytes']:raise ValueError('Original complete Sage_setup source archive differs')
+        setup_source=extract_tar(setup_archive,root/'normal-setup-source')
+        setup_before=source_snapshot(setup_source);save(root/'ORIGINAL_SETUP_SOURCE_LEDGER.json',setup_before)
+        setup_helper=setup_source/'sage_setup/command/sage_build_ext_minimal.py'
+        if sha(setup_helper)!=setup_pin['baseline_helper_sha256']:raise ValueError('Original Sage_setup helper source differs')
+        setup_patch=HERE/'patches/msvc-utf8-source-encoding.patch'
+        if sha(setup_patch)!='1ac8d7ec8f57be437450ac08dcd397fbeb1fe2f6c5f676c2f71b07b908e19818':raise ValueError('Reviewed MSVC UTF8 source patch differs')
+        run('normal-setup-source-patch-check',['git','-c','core.autocrlf=false','apply','-p2','--check',setup_patch],env,setup_source)
+        run('normal-setup-source-patch-apply',['git','-c','core.autocrlf=false','apply','-p2',setup_patch],env,setup_source)
+        if sha(setup_helper)!='a2c98530492f39d9097a6f24178f118f90ba73049c602de141f557677183b37b':raise ValueError('Candidate normal Sage_setup helper differs')
+        setup_snapshot=json.loads(json.dumps(setup_before));setup_snapshot['owned']['sage_setup/command/sage_build_ext_minimal.py']=sha(setup_helper)
+        save(root/'CANDIDATE_SETUP_SOURCE_LEDGER.json',setup_snapshot)
+        setup_out=root/'normal-setup-wheel';setup_out.mkdir()
+        run('normal-reviewed-setup-source-wheel',[py,'-I','-B','-m','pip','wheel','-v','--no-index','--no-deps','--no-build-isolation','-w',setup_out,setup_source],env,setup_source)
+        setup_wheels=list(setup_out.glob('passagemath_setup-*.whl'))
+        if len(setup_wheels)!=1:raise ValueError('Exactly one normal source-built Sage_setup provider required')
+        setup_wheel=wheelhouse/setup_wheels[0].name
+        if setup_wheel.exists():raise ValueError('Conflicting old/new same-version Sage_setup provider')
+        shutil.copyfile(setup_wheels[0],setup_wheel)
+        setup_inventory=wheel_inventory(setup_wheel,args.arch,require_native=False);setup_inventory['producer_role']='reviewed_normal_source_build_tool';wheel_manifests.append(setup_inventory)
+        run('normal-setup-source-wheel-byte-proof',[py,'-I','-B',HERE/'normal_setup_source_build.py','--source',setup_source,'--wheel',setup_wheel,'--arch',args.arch,'--output',root/'NORMAL_SETUP_SOURCE_WHEEL_PROOF.json'],env,setup_source)
+        run('normal-reviewed-setup-source-install',[py,'-I','-B','-m','pip','install','--no-index','--no-deps','--no-compile','--force-reinstall',setup_wheel],env)
+        run('normal-installed-setup-source-proof',[py,'-I','-B',HERE/'normal_setup_source_build.py','--source',setup_source,'--wheel',setup_wheel,'--arch',args.arch,'--installed','--output',root/'NORMAL_INSTALLED_SETUP_SOURCE_PROOF.json'],env,setup_source)
+        save(root/'REBUILT_WHEEL_MANIFESTS.json',wheel_manifests)
+
         run('normal-memory-allocator-wheel',[py,'-I','-B','-m','pip','wheel','--no-index','--no-deps','--no-build-isolation','-w',tools,memory],env)
         run('normal-memory-allocator-install',[py,'-I','-B','-m','pip','install','--no-index','--no-deps',next(tools.glob('memory_allocator-*.whl'))],env)
         env['PIP_NO_INDEX']='1';env['PIP_FIND_LINKS']=str(wheelhouse)+' '+str(tools)
@@ -302,6 +332,11 @@ def main():
                     code='from pathlib import Path;import hashlib,sys;p=Path(sys.prefix)/"Lib/site-packages/sage/libs/gsl/types.pxd";assert p.is_file();assert hashlib.sha256(p.read_bytes()).hexdigest()=='+repr(expected)+';print("NORMAL_PUBLIC_MODULES_TYPES",str(p))'
                     run('gsl-normal-public-modules-dependency',[py,'-I','-B','-c',code],env)
                 build_entry=run(package+'-normal-owner-wheel',[py,'-I','-B','-m','pip','wheel','-v','--no-index','--no-deps','--no-build-isolation','-w',out,source],env,source,timeout=5400)
+                compiler_output=b'\n'.join(Path(build_entry[key]['path']).read_bytes() for key in ('stdout','stderr'))
+                compiler_lines=[line.decode('utf-8',errors='replace') for line in compiler_output.splitlines() if b'cl.exe' in line.lower() and b'/c' in line and b'/Fo' in line]
+                utf8_proof={'actual_compile_commands':compiler_lines,'command_count':len(compiler_lines),'all_commands_have_utf8':bool(compiler_lines) and all('/utf-8' in line for line in compiler_lines),'C4819_warning_count':compiler_output.count(b'C4819'),'normal_reviewed_setup_wheel':file_record(setup_wheel)}
+                save(root/(package+'-NORMAL_MSVC_UTF8_COMPILE_PROOF.json'),utf8_proof)
+                if utf8_proof['all_commands_have_utf8'] is not True:raise ValueError('Normal MSVC producer did not consume reviewed Sage_setup UTF8 flag')
                 built=list(out.glob('*.whl'))
                 if len(built)!=1:raise ValueError('Expected exactly one normal owner wheel '+package)
                 ledger=root/(package+'-original-source-ledger.json');save(ledger,source_pins[package]);discovery_path=root/(package+'-normal-discovery.json')
@@ -352,114 +387,11 @@ def main():
         provider_path=root/'DECLARED_NATIVE_PROVIDERS.json';save(provider_path,providers)
         wheel_manifests_path=root/'REBUILT_WHEEL_MANIFESTS.json';save(wheel_manifests_path,wheel_manifests)
         accepted={r['package'] for r in builds if r.get('accepted') is True}
-        def transitive_dependencies(package):
-            selected=set();pending=list(requirements[package]['test_owner_dependencies'])
-            while pending:
-                dependency=pending.pop()
-                if dependency in selected:continue
-                selected.add(dependency);pending.extend(requirements[dependency]['test_owner_dependencies'])
-            return selected
-        stats_dir=root/'evidence-stats';stats_dir.mkdir()
-        for package in TEST_OWNERS:
-            contract=original_contracts[package]
-            record={'package':package,'test_kind':contract['test_kind'],'original_contract_sha256':contract['source_sha256'],'state':'blocked','exit':None,'summary_seen':False,'reported_tests':0,'provenance_passed':False,'units_matched':False,'original_target_jobs':[r['job_id'] for r in ORIGINAL_EIGHT if r['pr']==args.pr and r['arch']==args.arch and r['package']==package]}
-            blockers=sorted(({package}|transitive_dependencies(package))-accepted)
-            if blockers:
-                record.update({'blocked_by':blockers,'reason':'Missing accepted normally rebuilt target/dependency owner; no old wheel substitution'});tests.append(record);save(root/'TEST_RESULTS.json',tests);continue
-            distribution='sagemath-'+package.replace('_','-');cwd=args.checkout/'pkgs'/distribution;wheel=next(wheelhouse.glob('passagemath_'+package+'-*.whl'))
-            constraints=root/(package+'-constraints.txt');lines=[]
-            for owner in OWNERS:
-                if owner==package:continue
-                candidates=list(wheelhouse.glob('passagemath_'+owner+'-*.whl'))
-                candidate=candidates[0] if len(candidates)==1 and owner in accepted else root/'missing-owner'/('passagemath_'+owner+'-missing.whl')
-                lines.append('passagemath_'+owner+' @ '+candidate.resolve().as_uri())
-            for candidate in args.noarch.glob('*.whl'):lines.append(candidate.name.split('-')[0]+' @ '+(wheelhouse/candidate.name).resolve().as_uri())
-            constraints.write_text('\n'.join(lines)+'\n',encoding='utf-8')
-            test_env=dict(runtime_env);test_env.pop('PIP_NO_INDEX',None)
-            test_env.update({'PIP_FIND_LINKS':str(wheelhouse)+' '+str(tools),'PIP_CONSTRAINT':str(constraints),'PIP_BUILD_CONSTRAINT':str(constraints),'SAGE_DOCTEST_OPTIONS':'--verbose'})
-            setup_env=dict(test_env);setup_env['PATH']=env['PATH']
-            post_targets=[]
-            try:
-                listed=run(package+'-original-tox-list',[py,'-I','-B','-m','tox','-l','-q'],setup_env,cwd)
-                listed_text=Path(listed['stdout']['path']).read_text(encoding='utf-8',errors='replace')
-                envs=[re.sub(r'sagepython-.*nopypi-norequirements','py312-norequirements',line.strip()) for line in listed_text.splitlines() if line.strip()]
-                if envs!=['py312-norequirements-notest','py312-norequirements']:raise ValueError('Original complete tox environment contract differs')
-                run(package+'-normal-tox-install-before-math',[py,'-I','-B','-m','tox','-v','-v','--notest','-e',','.join(envs),'--installpkg',wheel],setup_env,cwd,timeout=1800)
-                # virtualenv's seeded pip RECORD can list absent .pyc files and
-                # cache directories under -B. Install the same verified normal
-                # pip wheel without compiling caches, then retain the original
-                # strict complete RECORD/member gate for every distribution.
-                pip_version=next(pin.split('==',1)[1] for pin in pins['third_party_build_pins'] if pin.startswith('pip=='))
-                pip_wheels=list(tools.glob('pip-'+pip_version+'-*.whl'))
-                if len(pip_wheels)!=1:raise ValueError('Exactly one verified same-version pip tool wheel required')
-                for original_env in envs:
-                    pip_identity='from importlib.metadata import version;value=version("pip");assert value=='+repr(pip_version)+';print("ORIGINAL_SEEDED_PIP_VERSION",value)'
-                    run(package+'-'+original_env+'-same-pip-version',[py,'-I','-B','-m','tox','exec','-e',original_env,'--','python','-I','-B','-c',pip_identity],test_env,cwd,timeout=600)
-                    run(package+'-'+original_env+'-normal-pip-record',[py,'-I','-B','-m','tox','exec','-e',original_env,'--','python','-I','-B','-m','pip','install','--no-index','--no-deps','--no-compile','--force-reinstall',pip_wheels[0]],test_env,cwd,timeout=600)
-                run(package+'-original-effective-tox-config',[py,'-I','-B','-m','tox','config','-e','py312-norequirements','-k','commands','set_env','pass_env'],test_env,cwd)
-                probe_path=root/(package+'-PRE_PROVENANCE.json')
-                probe_command=[py,'-I','-B','-m','tox','exec','-e','py312-norequirements','--','python','-I','-B',HERE/'child_inventory.py','--package',package,'--wheel-manifests',wheel_manifests_path,'--provider-manifest',provider_path,'--machine',identity['native_machine'],'--output',probe_path]
-                import_args=[]
-                for name in contract['imports']:import_args.extend(['--import-module',name])
-                if contract['test_kind']=='import-only':import_args.extend(['--original-import-only-contract-sha256',contract['source_sha256']])
-                probe_command=probe_command[:-2]+import_args+probe_command[-2:]
-                run(package+'-effective-tox-pretest-provenance',probe_command,test_env,cwd,timeout=600)
-                pre=json.loads(probe_path.read_text())
-                if pre.get('passed') is not True:raise ValueError('Pretest effective tox provenance failed')
-                post_targets.append({'environment':'py312-norequirements','command':probe_command,'before':pre,'path':root/(package+'-POST_PROVENANCE.json'),'run_name':package+'-effective-tox-posttest-provenance'})
-                notest_probe=None;notest_pre=None
-                if contract['test_kind']=='import-only':
-                    notest_path=root/(package+'-NOTEST_PRE_PROVENANCE.json');notest_probe=list(probe_command);notest_probe[notest_probe.index('-e')+1]='py312-norequirements-notest';notest_probe[-1]=notest_path
-                    run(package+'-original-notest-import-pre-provenance',notest_probe,test_env,cwd,timeout=600);notest_pre=json.loads(notest_path.read_text())
-                    if notest_pre.get('passed') is not True:raise ValueError('Original import-only notest environment provenance failed')
-                    post_targets.append({'environment':'py312-norequirements-notest','command':notest_probe,'before':notest_pre,'path':root/(package+'-NOTEST_POST_PROVENANCE.json'),'run_name':package+'-original-notest-import-post-provenance'})
-                record['provenance_passed']=True
-                selected=None;stats_path=None
-                if contract['test_kind']=='mathematics':
-                    bash_probe_path=root/(package+'-BASH_PRE_PROVENANCE.json')
-                    bash_body='set -e; cp=$1; shift; p=$(command -v python); r=$(command -v sage-runtests); export PROFILE_BASH_PYTHON="$("$cp" -w "$p")" PROFILE_BASH_SAGE_RUNTESTS="$("$cp" -w "$r")"; exec python -I -B "$@"'
-                    child_arguments=probe_command[probe_command.index(HERE/'child_inventory.py')+1:];child_arguments[-1]=bash_probe_path
-                    bash_probe=[py,'-I','-B','-m','tox','exec','-e','py312-norequirements','--','bash','-c',bash_body,'original-bash-resolution',cygpath,HERE/'child_inventory.py','--require-bash-resolution',*child_arguments]
-                    run(package+'-original-bash-native-launcher-resolution',bash_probe,test_env,cwd,timeout=600)
-                    bash_readback=json.loads(bash_probe_path.read_text())
-                    if bash_readback.get('original_bash_resolution',{}).get('passed') is not True or bash_readback['installed_distribution_source_lock_sha256']!=pre['installed_distribution_source_lock_sha256']:raise ValueError('Original Bash/launcher/source identity mismatch')
-                    record['original_bash_native_launcher_proven']=True
-                    selected_path=root/(package+'-SELECTED_UNITS.json');contract_path=root/(package+'-ORIGINAL_CONTRACT.json');save(contract_path,contract)
-                    run(package+'-normal-unit-selection',[py,'-I','-B','-m','tox','exec','-e','py312-norequirements','--','python','-I','-B',HERE/'doctest_units.py','--tox-ini',cwd/'tox.ini','--contract',contract_path,'--package',package,'--output',selected_path],test_env,cwd,timeout=600)
-                    selected=json.loads(selected_path.read_text());stats_path=Path(selected['stats_path'])
-                entry=run(package+'-complete-original-tox',[py,'-I','-B','-m','tox','-v','-v','-e',','.join(envs),'--installpkg',wheel],test_env,cwd,timeout=10800,strict=False)
-                record['exit']=entry['exit'];record['state']='executed';record['actual_tox_receipt']=entry
-                text=Path(entry['stdout']['path']).read_text(encoding='utf-8',errors='replace')+'\n'+Path(entry['stderr']['path']).read_text(encoding='utf-8',errors='replace')
-                clean_execution=type(entry['exit']) is int and entry['exit']==0 and entry.get('remaining_pids')==[] and not entry.get('timed_out') and not entry.get('error') and not entry.get('remaining_query_error')
-                record['summary_seen']='Total time for all tests:' in text if contract['test_kind']=='mathematics' else clean_execution
-                if contract['test_kind']=='import-only':record.update({'reported_tests':0,'units_matched':clean_execution,'mathematical_test_pass_claimed':False,'original_import_only_commands':contract['active_commands']})
-                if stats_path is not None and stats_path.is_file():
-                    copied_stats=stats_dir/(package+'.timings2.json');shutil.copyfile(stats_path,copied_stats)
-                    def unique(pairs):
-                        value={}
-                        for key,item in pairs:
-                            if key in value:raise ValueError('Duplicate actual stats key '+key)
-                            value[key]=item
-                        return value
-                    stats=json.loads(copied_stats.read_text(),object_pairs_hook=unique);unit_result=compare_units(selected['units'],stats,selected['baseline'])
-                    save(root/(package+'-ACTUAL_UNIT_READBACK.json'),unit_result);record['units_matched']=unit_result['passed'];record['reported_tests']=unit_result['reported_tests'];record['preexisting_known_failure_units']=unit_result['known_failure_count']
-                if not clean_execution:record['units_matched']=False
-                record['skip_count']=None;record['skip_count_availability']='Raw original verbose skip output retained; no fabricated zero count'
-                if 'Error in doctesting framework' in text or re.search(r'Unhandled SIG|SIGSEGV|Process died|Timed out',text):record['units_matched']=False
-            except Exception as error:
-                record.update({'error':str(error),'error_type':type(error).__name__,'last_actual_command':receipts[-1] if receipts else None,'provenance_passed':False,'units_matched':False})
-            finally:
-                def verify_post(target):
-                    command=list(target['command']);command[-1]=target['path']
-                    run(target['run_name'],command,test_env,cwd,timeout=600)
-                    post=json.loads(target['path'].read_text());before=target['before']
-                    if post.get('passed') is not True or before['public_types_expected_sha256']!=post['public_types_expected_sha256'] or before['installed_distribution_source_lock_sha256']!=post['installed_distribution_source_lock_sha256']:raise ValueError('Posttest installed provenance/source lock failed')
-                    return {'passed':True,'post_file':file_record(target['path']),'installed_distribution_source_lock_sha256':post['installed_distribution_source_lock_sha256']}
-                outcomes=independent_post_provenance(post_targets,verify_post)
-                record['post_provenance_attempts']=outcomes
-                if any(row['passed'] is not True for row in outcomes):record.update({'provenance_passed':False,'units_matched':False,'post_provenance_errors':[row for row in outcomes if row['passed'] is not True]})
-                if contract['test_kind']=='import-only':record['both_original_import_envs_provenance']=len(outcomes)==2 and all(row['passed'] is True for row in outcomes)
-            tests.append(record);save(root/'TEST_RESULTS.json',tests)
+        from original_test_matrix import execute_original_jobs
+        execute_original_jobs(root=root,checkout=args.checkout,py=py,wheelhouse=wheelhouse,tools=tools,noarch=args.noarch,
+            contracts=original_contracts,accepted=accepted,requirements=requirements,runtime_env=runtime_env,build_env=env,
+            identity=identity,manifests_path=wheel_manifests_path,provider_path=provider_path,cygpath=cygpath,here=HERE,
+            pins=pins,pr=args.pr,arch=args.arch,run=run,save=save,file_record=file_record,tests=tests)
         result=complete_result(builds,tests);result.update({'identity':identity,'pr':args.pr,'arch':args.arch,'original_merge_sha':source_commit,'same_vm_ephemeral_wheelhouse':True,'artifact_uploads':0,'actions_cache_writes':0,'binary_delivery':False,'native_sdk_rebuilt_from_source':False,'old_sdk_basis_plus_normal_source_fixed_homfly_and_source_fixed_import_library':True})
     except BaseException as error:
         result=complete_result(builds,tests);result.update({'passed':False,'error':str(error),'error_type':type(error).__name__,'pr':args.pr,'arch':args.arch,'identity':identity,'original_upstream_job_rerun':False})
@@ -468,7 +400,9 @@ def main():
         for package in OWNERS:
             if package not in {r['package'] for r in builds}:builds.append({'package':package,'state':'blocked','exit':None,'accepted':False,'reason':'Earlier preparation/framework failure; no execution claimed'})
         for package in TEST_OWNERS:
-            if package not in {r['package'] for r in tests}:tests.append({'package':package,'state':'blocked','exit':None,'summary_seen':False,'reported_tests':0,'provenance_passed':False,'units_matched':False,'reason':'Earlier preparation/framework failure; no execution claimed'})
+            if package not in {r['package'] for r in tests}:
+                targets=original_contracts[package]['environment_targets'] if 'original_contracts' in locals() else []
+                tests.append({'package':package,'state':'blocked','exit':None,'summary_seen':False,'reported_tests':0,'provenance_passed':False,'units_matched':False,'environments':[dict(t,state='blocked',exit=None,accepted=False,pre_provenance_passed=False,post_provenance_passed=False) for t in targets],'reason':'Earlier preparation/framework failure; no execution claimed'})
         save(root/'BUILD_RESULTS.json',builds);save(root/'TEST_RESULTS.json',tests)
         close=closing();final=complete_result(builds,tests)
         if result and result.get('error'):final.update({'error':result['error'],'error_type':result['error_type']})

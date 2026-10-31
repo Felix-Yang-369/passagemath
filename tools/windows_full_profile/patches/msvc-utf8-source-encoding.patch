@@ -1,0 +1,18 @@
+--- a/src/sage_setup/command/sage_build_ext_minimal.py
++++ b/src/sage_setup/command/sage_build_ext_minimal.py
+@@ -13,6 +13,15 @@
+     def initialize_options(self):
+         build_ext.initialize_options(self)
+         self.parallel = self.get_default_number_build_jobs()
++
++    def build_extensions(self):
++        # Sage C/C++ sources are UTF-8, independently of the Windows code page.
++        if self.compiler.compiler_type == "msvc":
++            for ext in self.extensions:
++                extra_args = list(ext.extra_compile_args or [])
++                if "/utf-8" not in extra_args:
++                    ext.extra_compile_args = extra_args + ["/utf-8"]
++        super().build_extensions()
+ 
+     @staticmethod
+     def get_default_number_build_jobs() -> int:

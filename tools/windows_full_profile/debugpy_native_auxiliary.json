@@ -1,0 +1,1639 @@
+{
+  "schema": "official-debugpy-auxiliary-native-v1",
+  "project": "debugpy",
+  "version": "1.8.22",
+  "scope": "Only exact un-loaded debugger attachment DLL/EXE payloads may have another machine. Candidate owners, Python extensions and actually loaded non-OS providers retain native target checks.",
+  "metadata_url": "https://pypi.org/pypi/debugpy/1.8.22/json",
+  "metadata_sha256": "5fbc80c6f2ea65cf3dcba328a7b90181e6c6380929259a84d8dea2230065dab2",
+  "architectures": {
+    "x64": {
+      "native_target_machine": "0x8664",
+      "producer_kind": "official_wheel",
+      "wheel": {
+        "filename": "debugpy-1.8.22-cp312-cp312-win_amd64.whl",
+        "url": "https://files.pythonhosted.org/packages/4b/fe/e7d3b72874cdd327bda295d1995a01e426857ae9cbaaba74fd997bc3afbc/debugpy-1.8.22-cp312-cp312-win_amd64.whl",
+        "sha256": "371a4ba4a5975eb958393903f3254cf983da7b1c7c178b3f987ee427f42515e3",
+        "bytes": 5398304,
+        "internal_WHEEL_tags": [
+          "cp312-cp312-win_amd64"
+        ]
+      },
+      "all_original_wheel_members": [
+        {
+          "name": "debugpy/ThirdPartyNotices.txt",
+          "bytes": 34844,
+          "sha256": "e3baaa532b9e2303b187b18e05dfed48961d6d16c82d0ae47978b2fd2ce47084"
+        },
+        {
+          "name": "debugpy/__init__.py",
+          "bytes": 1114,
+          "sha256": "17c0134a5eb47174c55e4a05c549c0014f45d3bf3ea18245c1dd9a1cfd0d545c"
+        },
+        {
+          "name": "debugpy/__main__.py",
+          "bytes": 3258,
+          "sha256": "f5be25012018fa4dbc0b442be2d08d2b970b12df7ee7653236b0ceb8a471b334"
+        },
+        {
+          "name": "debugpy/_version.py",
+          "bytes": 519,
+          "sha256": "9ec71f467fe5d6d2c2cf19f059e3dc40273f90381cd1bc6bccbe2a725a0a02a9"
+        },
+        {
+          "name": "debugpy/public_api.py",
+          "bytes": 10028,
+          "sha256": "709aded2132f36a3756faa851fc2b2fac6ffacb4c140639187108dab0cd69d9e"
+        },
+        {
+          "name": "debugpy/py.typed",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "name": "debugpy/_vendored/__init__.py",
+          "bytes": 4004,
+          "sha256": "5f62cc11bf547d8cda606938f4c7f5aac98aca416b8613b4d5b31cfa02f27e1d"
+        },
+        {
+          "name": "debugpy/_vendored/_pydevd_packaging.py",
+          "bytes": 1293,
+          "sha256": "65e40179e0ed1b78bbe5709052cc985f709f2387c034193d9c23b0a4b275c871"
+        },
+        {
+          "name": "debugpy/_vendored/_util.py",
+          "bytes": 1899,
+          "sha256": "9e47c5bb238ac0f518d4c9e4bbedfe4982100de51e89d10f9256890b2210813c"
+        },
+        {
+          "name": "debugpy/_vendored/force_pydevd.py",
+          "bytes": 3253,
+          "sha256": "ab41dbdcd058bb4e77fefd4baaac1f3273a527b56d3d6b049c14d2a5700bb348"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/pydev_app_engine_debug_startup.py",
+          "bytes": 691,
+          "sha256": "181d1cb46ea7dc14aa48ccb98cfde09ea52646670841ae9edd8effd4c3890c26"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/pydev_coverage.py",
+          "bytes": 3198,
+          "sha256": "67ba2b86430565d75feebd566298623e21d10fffa360ab03a01492fea7baa532"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/pydev_pysrc.py",
+          "bytes": 102,
+          "sha256": "ba5b09996cbe95401c522e4f3793072f3fa28056e2116449de186535b6331ba1"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/pydev_run_in_console.py",
+          "bytes": 4789,
+          "sha256": "107e5aa2b9df5529ca69e2db9ef9c89f8e5d6ebecd19288145b550bf13d25af1"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/pydevconsole.py",
+          "bytes": 21730,
+          "sha256": "db6cddaa5f29681a427a4fcafe7c7c7e711fecaa620911b1b644c35b7c7bd0cc"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/pydevd.py",
+          "bytes": 165613,
+          "sha256": "4e32fc93bd3a0d6e3f198826fa9140820d82587575fe60a19098a472534974db"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/pydevd_file_utils.py",
+          "bytes": 38446,
+          "sha256": "e89e90919b026288800fcad3a7e22bc924d8ff9235112f885f822c39b215b965"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/pydevd_tracing.py",
+          "bytes": 16263,
+          "sha256": "1f1f3bda155a876f1e7dd1c4bd92c5879390317a13d80f80ac806bc08226b870"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/setup_pydevd_cython.py",
+          "bytes": 14087,
+          "sha256": "93a8d1b628548382a16aa53ab44e768e01f269df1f3abf745e78c8641c19a5e1"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydev_bundle/__init__.py",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydev_bundle/_pydev_calltip_util.py",
+          "bytes": 4839,
+          "sha256": "8246365ff0a8fe4ace8b9252a727b3af023972f185e675855f4ac2dd0820f69d"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydev_bundle/_pydev_completer.py",
+          "bytes": 8802,
+          "sha256": "7e6847c85dc2b75384c3a1a8fe792beaede572e30d0340c3c1f4551cbd240d7c"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydev_bundle/_pydev_execfile.py",
+          "bytes": 501,
+          "sha256": "afcf1aadf528f97450d20f003aa5469cb5ca576db02edbd1d3eb8cb4a05c6759"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydev_bundle/_pydev_filesystem_encoding.py",
+          "bytes": 1144,
+          "sha256": "e637fbd62fc2ada3d9aa0db896d384e5afce341cadc62f19f7c318ab2888b03f"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydev_bundle/_pydev_getopt.py",
+          "bytes": 4562,
+          "sha256": "a86184be76dbee318698e8aa47c051bf952e3fd83852b1ea8940c0a73a3cb8fc"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydev_bundle/_pydev_imports_tipper.py",
+          "bytes": 12684,
+          "sha256": "f13f86781baa9fb6238553b3904a2cdcef929dcdb2c8f02d21c04ae4d31a1f30"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydev_bundle/_pydev_jy_imports_tipper.py",
+          "bytes": 17479,
+          "sha256": "3fa85c317a7c8b6aad2a4f402ae80134febcc5e5be2a012d5c2f997cad2c3cde"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydev_bundle/_pydev_log.py",
+          "bytes": 577,
+          "sha256": "6deac3029983d693df2db4aed4ce36948f70fff4a0c8b1a66f89173d02c79ac0"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydev_bundle/_pydev_saved_modules.py",
+          "bytes": 4874,
+          "sha256": "7a17ebd0fa6e91f6f6540c5570060d4619b96c9e9e72ee996fb55756865f9cc4"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydev_bundle/_pydev_sys_patch.py",
+          "bytes": 2314,
+          "sha256": "c87a9894be6af43726b83af3afed0006dfdc9ea8b65f493d888743d3f124f41d"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydev_bundle/_pydev_tipper_common.py",
+          "bytes": 1281,
+          "sha256": "cc9472d96ffae0629d759be49b8d15fe7efb6d9be7e7622d4ef822b0bc24a5ae"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydev_bundle/pydev_console_utils.py",
+          "bytes": 24391,
+          "sha256": "ac01e9f9eb6fcc13861c8854b19682e02cb04ff02b774d3f89523bd0d18354c8"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydev_bundle/pydev_import_hook.py",
+          "bytes": 1358,
+          "sha256": "68bff8131c653ee9d67ee18c57d51b57aec6e5c4a43ae6a4c0ac9ecebe40b218"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydev_bundle/pydev_imports.py",
+          "bytes": 415,
+          "sha256": "3bc7be48346cc6588ca3ba938a8996d6530702d29a03502d8f5a515405d24dcd"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydev_bundle/pydev_ipython_console.py",
+          "bytes": 3868,
+          "sha256": "9e73dd0b3dce2a43e8cfa1c91abb4084ca7b7d8aa68bf7fa23db8f3416e9f6ce"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydev_bundle/pydev_ipython_console_011.py",
+          "bytes": 21711,
+          "sha256": "9c28286e0d6eae299d24c0311181d9ec41df9d46a26ea4fbf71cdd0d353d3d65"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydev_bundle/pydev_is_thread_alive.py",
+          "bytes": 1064,
+          "sha256": "8348f3a84260c27cb7bf75172eb550aabaa6ba68a0132e3f0a447dc87aba2e6e"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydev_bundle/pydev_localhost.py",
+          "bytes": 2139,
+          "sha256": "a5516d45eabb9bc012ab30c2a109fa50d26bf56754204ff62cf071602eefdc15"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydev_bundle/pydev_log.py",
+          "bytes": 9605,
+          "sha256": "5d37a881ae8d7c9d88b9b21e375c2d37a4a7d23ee5a66a056e9474ea3a529ec8"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydev_bundle/pydev_monkey.py",
+          "bytes": 46691,
+          "sha256": "5a757c96e37dbdf97e430c973aba988eaf8ec9d5d1093b40471f40b7c35d597d"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydev_bundle/pydev_monkey_qt.py",
+          "bytes": 7530,
+          "sha256": "e1e77a5dd27bf54135bf36b3d3d067c7672551d9535693c3af86919ef698c8cf"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydev_bundle/pydev_override.py",
+          "bytes": 908,
+          "sha256": "64652305bcd5da0b1ac62e0b5ee63338f669f967dbfeed158b11eec1f701000d"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydev_bundle/pydev_umd.py",
+          "bytes": 6409,
+          "sha256": "ce80ae9e4f947a72ba9a1296154324ee771d3ae02459e1611c3536271a3a941e"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydev_bundle/pydev_versioncheck.py",
+          "bytes": 524,
+          "sha256": "1f4e3889e3a0106deb7c56376afe1c6d7a3f7c951f806ed61d7f1718d2aaa13b"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydev_bundle/fsnotify/__init__.py",
+          "bytes": 13057,
+          "sha256": "1df1633ec702b61353a13713dab0ba27c919cf208afa4057d62ba7d11acc47e7"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydev_runfiles/__init__.py",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydev_runfiles/pydev_runfiles.py",
+          "bytes": 33562,
+          "sha256": "a16abf05d1d9f9faae0fa64f29bd93b265ffc848afe6f2e214f8e806582e9c01"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydev_runfiles/pydev_runfiles_coverage.py",
+          "bytes": 3485,
+          "sha256": "cf386f511f7db82370ae67565207386bebbc92a33405a5a253691f627721ef89"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydev_runfiles/pydev_runfiles_nose.py",
+          "bytes": 7762,
+          "sha256": "65f86d97254b3a63c76ee9e2af6094b05b0772c7ce3192da98bd728abc0c4a52"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydev_runfiles/pydev_runfiles_parallel.py",
+          "bytes": 9746,
+          "sha256": "5af18c9bb38d7aba44cdf7d8b47e6d2afe71613970ec788e229d55248b71215f"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydev_runfiles/pydev_runfiles_parallel_client.py",
+          "bytes": 7906,
+          "sha256": "fc2368d20d4a55c8cd02d1274f2b41fdd07b9224dc185cbe160bfebf1dde8f41"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydev_runfiles/pydev_runfiles_pytest2.py",
+          "bytes": 10153,
+          "sha256": "7541b66229c6f0c5e6cb5bafa59c8ac85a97879e99346146f536e16c7636a12b"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydev_runfiles/pydev_runfiles_unittest.py",
+          "bytes": 6707,
+          "sha256": "1f24a6ddc44fc15576c426c3f7864d9ba234d92729a55e9306069a5a9ced2704"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydev_runfiles/pydev_runfiles_xml_rpc.py",
+          "bytes": 11093,
+          "sha256": "28aae84b2f1ccd5ed7edfec3c732a796de71ddddd8555f325d541fb2d2cee03c"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydevd_bundle/__init__.py",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydevd_bundle/pydevconsole_code.py",
+          "bytes": 19489,
+          "sha256": "c5d15707a330b70a9566023a6ca480fe6e961557ac03feb3546adea5dc6d941b"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydevd_bundle/pydevd_additional_thread_info.py",
+          "bytes": 1685,
+          "sha256": "e454cb6284b9e749e7288bf6a2510f2425e0fe51eb993fef7820588360196567"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydevd_bundle/pydevd_additional_thread_info_regular.py",
+          "bytes": 11231,
+          "sha256": "1ddf38f460f8061b8bc1ce94e865292350f898b2f423881d7a996c3c1f706a6f"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydevd_bundle/pydevd_api.py",
+          "bytes": 52616,
+          "sha256": "701b2b6eeefff2d2c416f140c7c6f87aa6a2177b91ff09cff9100d68d04422aa"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydevd_bundle/pydevd_breakpoints.py",
+          "bytes": 6428,
+          "sha256": "3e4cdc57cb925aac5a5c3689152ac9dd853d7dd17b5a07e33d0948f45fb78f2e"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydevd_bundle/pydevd_bytecode_utils.py",
+          "bytes": 29963,
+          "sha256": "ad8c2970f607ab936bce173b14ee9482e2d41dd7b23aa8795e919a7d442060b2"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydevd_bundle/pydevd_bytecode_utils_py311.py",
+          "bytes": 3705,
+          "sha256": "8094a2481fff7e8663d7ec64e9d6c55aeb5b78affa1a1a39def116c75f72dec4"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydevd_bundle/pydevd_code_to_source.py",
+          "bytes": 18165,
+          "sha256": "1df58cf99a9482c3cf595043c1eb3d22e29a48b1bc641de58437c512eaba872c"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydevd_bundle/pydevd_collect_bytecode_info.py",
+          "bytes": 36590,
+          "sha256": "7994378912ef1a5310db47461b15d8630d1a9bdd8af2239f6c4cf2542fdc1101"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydevd_bundle/pydevd_comm.py",
+          "bytes": 82579,
+          "sha256": "2046a5cc444024a04d29165a7d85129aa75a689a55ee24b1573f4817f32bb60c"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydevd_bundle/pydevd_comm_constants.py",
+          "bytes": 6276,
+          "sha256": "0f324ad02ce20ffcbeba4b4011332c18bfae26daafd36212133e54ddff993717"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydevd_bundle/pydevd_command_line_handling.py",
+          "bytes": 6283,
+          "sha256": "bfd68c2352a9200a0397b225e09fc4abec4bbbdcb05d4deea33bb272fa66e853"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydevd_bundle/pydevd_console.py",
+          "bytes": 10434,
+          "sha256": "9f54a4feff2b4bcb7068585c6d2df686c0974e7f981eea07c11d6f03a1dec30f"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydevd_bundle/pydevd_constants.py",
+          "bytes": 30300,
+          "sha256": "164bc14b2d7799a1b0f2e3ee6668706de73e501ac66dbd530fa8f5dfb2207412"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydevd_bundle/pydevd_custom_frames.py",
+          "bytes": 4538,
+          "sha256": "1ef3fa090b77d963e22e99d01732496ec570164451bd8a435e8a8b5a7650de5d"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydevd_bundle/pydevd_cython.c",
+          "bytes": 2604969,
+          "sha256": "e5cdcf5b54006888b0edd409f6be4f551b23ce8c36092253b52566e8e66fa1d6"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydevd_bundle/pydevd_cython.cp312-win_amd64.pyd",
+          "bytes": 338256,
+          "sha256": "b984bfd0c3836e29be2326a09769aaf3616dd804eadac1979dd443dbb42659bf"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydevd_bundle/pydevd_cython.pxd",
+          "bytes": 1775,
+          "sha256": "4021a51c9526cbc98880b2d739ddcba92cdc4fa40687d1939a39aed5dbf651f8"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydevd_bundle/pydevd_cython.pyx",
+          "bytes": 101478,
+          "sha256": "be7452ebda9ca3280ea08c4075c07541850378d332d03389a69dd53f34f04786"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydevd_bundle/pydevd_cython_wrapper.py",
+          "bytes": 1913,
+          "sha256": "13f6addba03411fc786d7198721da0cea1690f1eca3ddbb85cd50430e5290781"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydevd_bundle/pydevd_daemon_thread.py",
+          "bytes": 8579,
+          "sha256": "e7a7858d8fbe1d7440d3478f3141bdfe640df02140a509ab8152e8ac8cc81373"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydevd_bundle/pydevd_defaults.py",
+          "bytes": 2358,
+          "sha256": "5762c7f4bc48fb51b96409b393119692ca280f6b122e3ab09b779f9df69f7e67"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydevd_bundle/pydevd_dont_trace.py",
+          "bytes": 3685,
+          "sha256": "546a03a77811b4c9a1ab0314a06486e17c03e53ca7ca7278e6871ba53400ec2b"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydevd_bundle/pydevd_dont_trace_files.py",
+          "bytes": 6541,
+          "sha256": "41e4d2ba0eecda4c6b78d4a0d393fe4bd0e45172c8d7a1787c5f47aa0c1bfd65"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydevd_bundle/pydevd_exec2.py",
+          "bytes": 165,
+          "sha256": "b981fd20225b5628a5c4d3b679611ab669e5cda28618fb2eccf78388257dc6c4"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydevd_bundle/pydevd_extension_api.py",
+          "bytes": 4013,
+          "sha256": "9178931633f3c7e724dc1440b28f8f7d55f0996b28c236456a71dbde4f36ae5e"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydevd_bundle/pydevd_extension_utils.py",
+          "bytes": 2365,
+          "sha256": "b7c65b86e0f99b0d549390c3a4fdd74e6cebd194ec3b936efbcb4c9ac85a5956"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydevd_bundle/pydevd_filtering.py",
+          "bytes": 13372,
+          "sha256": "b12724c59699c9c8e4abc7f5e44154cb7415ad0bfa73b06854c80ed6584334a4"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydevd_bundle/pydevd_frame.py",
+          "bytes": 66254,
+          "sha256": "257acff2356c3acc9c7e9d8bddb9d1c3e603fb15c0597def33b52bd71783dd35"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydevd_bundle/pydevd_frame_utils.py",
+          "bytes": 15488,
+          "sha256": "7cf15031e65af09b74d0f19ba9c4075ad2017f46a5c430f94fa984bd7cf911c6"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydevd_bundle/pydevd_gevent_integration.py",
+          "bytes": 3957,
+          "sha256": "b4ae57285766f67ae783a89a868297a3ea94e9c1a9c7da9f1274c9ff54502982"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydevd_bundle/pydevd_import_class.py",
+          "bytes": 1849,
+          "sha256": "2efbc07398c5ff9c6b8e58fe840fc043183333294c4969882af489189cda9697"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydevd_bundle/pydevd_io.py",
+          "bytes": 8371,
+          "sha256": "591c89974e576096c046fe553b841eb40e0118ae5dbbcf758f5ed66aa124bb00"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydevd_bundle/pydevd_json_debug_options.py",
+          "bytes": 6353,
+          "sha256": "986a4f39bee299e1b42ca70f92cdd78d6d6da23e82b80cf04e48937dd425d976"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydevd_bundle/pydevd_net_command.py",
+          "bytes": 4852,
+          "sha256": "9e7c563497edc651b0dcd473c69fbe94fb8e74e396b04ca112c041ef3eaacd9a"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydevd_bundle/pydevd_net_command_factory_json.py",
+          "bytes": 26421,
+          "sha256": "14a59070adee61ac7567ec46410c2a654f1e6cc97437b32b4b1a92fe172d824b"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydevd_bundle/pydevd_net_command_factory_xml.py",
+          "bytes": 24342,
+          "sha256": "d929e343b877e11cd6b1e08f4d5ac7e30a73378cbb2fac01a52452333dcb87b7"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydevd_bundle/pydevd_plugin_utils.py",
+          "bytes": 7427,
+          "sha256": "04565977432838410f280e6b623ae9afe94743c3625996ea95551aad002c844b"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydevd_bundle/pydevd_process_net_command.py",
+          "bytes": 36814,
+          "sha256": "c59f5e24a6a5e182a87e05b87766ead05cda3154869deb7b1251543b284562c7"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydevd_bundle/pydevd_process_net_command_json.py",
+          "bytes": 62020,
+          "sha256": "a72a929592b5d83551b0d955f5ef68e1fbda9d9331dffa8f3522ddd9338f54f2"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydevd_bundle/pydevd_referrers.py",
+          "bytes": 9930,
+          "sha256": "5d9caf036b5732f074e82914f6d22b85660452a518384584d6f9bfb3d280867e"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydevd_bundle/pydevd_reload.py",
+          "bytes": 16348,
+          "sha256": "06e3ef18457899498054a1d5d50b31690b240e524c896a537f8288b274af8fc0"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydevd_bundle/pydevd_resolver.py",
+          "bytes": 30862,
+          "sha256": "3f787b6a0857881db41f3ceb47d1b87079b89858ca55948406fe8f20552e50e7"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydevd_bundle/pydevd_runpy.py",
+          "bytes": 13342,
+          "sha256": "8206d603f80b21dbe8b631f51d7c47ce20fcdb3511e392f596bb564ab13ac567"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydevd_bundle/pydevd_safe_repr.py",
+          "bytes": 14787,
+          "sha256": "a5e34189d6997763ad191cebc7af929ffb82f5794753badd8d5e270a4a6e19a9"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydevd_bundle/pydevd_save_locals.py",
+          "bytes": 4290,
+          "sha256": "f8687b2f46d095dfa88dc675b20e92b13166ddd26a7ffd5ac13f8bdeb259d069"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydevd_bundle/pydevd_signature.py",
+          "bytes": 7078,
+          "sha256": "681745bc716ccf133e0f3edd0c0e02a98aaecb871e2d12b2055191894204de96"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydevd_bundle/pydevd_source_mapping.py",
+          "bytes": 6643,
+          "sha256": "e35d771fd3c263f32222ab66721d6ff037f33954df32f7d72989c90fe119afdb"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydevd_bundle/pydevd_stackless.py",
+          "bytes": 17333,
+          "sha256": "8c0cfafd38d0bc9c52b610defd1a5843832537d7b4862c5454b6730bbe6bdbc2"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydevd_bundle/pydevd_suspended_frames.py",
+          "bytes": 22303,
+          "sha256": "c6cda1ad90ac634d104dd6fadf9d9a10eee4ef74743e87178b108c23db11b758"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydevd_bundle/pydevd_thread_lifecycle.py",
+          "bytes": 4358,
+          "sha256": "f64cc32d13ba37d39c26ec5c364b6b372889c1492c6391e8f52e5414767dba22"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydevd_bundle/pydevd_timeout.py",
+          "bytes": 8644,
+          "sha256": "03263b5a2c549e28c46961d1da24252aebcc5ab0e84cb8da889d2327c076ffd2"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydevd_bundle/pydevd_trace_dispatch.py",
+          "bytes": 4009,
+          "sha256": "b41a5169075253d39a13e135f756d86023011c93fc104c3576bc6ed26325ed1d"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydevd_bundle/pydevd_trace_dispatch_regular.py",
+          "bytes": 23908,
+          "sha256": "28fd8eccb36c38e653ed101b97d8949718f6ccc6c7c2c1b4971fe0af7d29af08"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydevd_bundle/pydevd_traceproperty.py",
+          "bytes": 3345,
+          "sha256": "9be61f1b59a17605450cea7513d442d2d6fbe5dce09bab825a287d4e4fee3e99"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydevd_bundle/pydevd_utils.py",
+          "bytes": 18336,
+          "sha256": "2a9504691cfe5447cfab6d6281d587f3d2f57abc3d5d2e135c6be97768649813"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydevd_bundle/pydevd_vars.py",
+          "bytes": 34329,
+          "sha256": "b5eadd802400773b1df075c9f9738c5ddb2a5af6973b22bedf43dc7d898b9d7c"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydevd_bundle/pydevd_vm_type.py",
+          "bytes": 1597,
+          "sha256": "7272878ad719d54f848301a9f30e6e4d29ec9fef4d451930a093f9e9282ccf7d"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydevd_bundle/pydevd_xml.py",
+          "bytes": 15933,
+          "sha256": "74325bf94ff560a009ce7dbe66e3ae3b792bc4bbf016c5da06d2091c1b70d264"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydevd_bundle/_debug_adapter/__init__.py",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydevd_bundle/_debug_adapter/__main__pydevd_gen_debug_adapter_protocol.py",
+          "bytes": 23959,
+          "sha256": "5f7a06d2d6037ef665b3cc3c51e06c1a393eda10f308fa644077a418c4b52c73"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydevd_bundle/_debug_adapter/debugProtocol.json",
+          "bytes": 174580,
+          "sha256": "183c21b21c8edd5c7163e5edddf106cf0a8e11cf62d37ac17d47a3a847006c99"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydevd_bundle/_debug_adapter/debugProtocolCustom.json",
+          "bytes": 10940,
+          "sha256": "abec6679af3cd9c9c75948b25fe9ebe4aacf7b6248b663c9b2e6e2ab4f954c2f"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydevd_bundle/_debug_adapter/pydevd_base_schema.py",
+          "bytes": 4143,
+          "sha256": "c64ab548549d57e7c04da6d315fa2d04b9480827011863c73212d673b84d331d"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydevd_bundle/_debug_adapter/pydevd_schema.py",
+          "bytes": 860496,
+          "sha256": "b27ae99b2249e8774aa629420ad1ba3d8f8c33f4c6db22afd2a441e45387d6d0"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydevd_bundle/_debug_adapter/pydevd_schema_log.py",
+          "bytes": 1299,
+          "sha256": "f3419ebeeca1eeb9075ad39154b781dca168cb7d1623ef437052ebd2f6ab1fac"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydevd_bundle/pydevd_concurrency_analyser/__init__.py",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydevd_bundle/pydevd_concurrency_analyser/pydevd_concurrency_logger.py",
+          "bytes": 21190,
+          "sha256": "b500f2f4beeb1d8a69427c4da303bea81f89096cdbf1a4febbe3f0845512dc78"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydevd_bundle/pydevd_concurrency_analyser/pydevd_thread_wrappers.py",
+          "bytes": 2120,
+          "sha256": "453b963cd138a3b23ad22709ffdd90fb0dc3af4f66e69be68d94d5e563e75551"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydevd_frame_eval/.gitignore",
+          "bytes": 90,
+          "sha256": "2854dde1200025b37a74460e9bdaeb0557f28e8e47b74d171f469659949bc812"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydevd_frame_eval/__init__.py",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydevd_frame_eval/pydevd_frame_eval_cython_wrapper.py",
+          "bytes": 1384,
+          "sha256": "2508916791464fe04eecff56e8528df06e2c94826fb8e73528c56a5caa6ae761"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydevd_frame_eval/pydevd_frame_eval_main.py",
+          "bytes": 2515,
+          "sha256": "1c776b00f6029cded71c14bbf0733c6ab3ee5b0b549af279ee7580f988bf8016"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydevd_frame_eval/pydevd_frame_evaluator.c",
+          "bytes": 1200437,
+          "sha256": "0b087abafd7fdbfb733e8dddd424e41240d7cf9ab5b5a3bf8a8cc1c06f5a7c51"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydevd_frame_eval/pydevd_frame_evaluator.pxd",
+          "bytes": 5455,
+          "sha256": "3751bca6e71723e06edb73ed62014f68fe21074118c3a131b8c4192715f4600c"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydevd_frame_eval/pydevd_frame_evaluator.template.pyx",
+          "bytes": 25163,
+          "sha256": "9f8ed007cb499819b800458c37889d54b19cde9e12bb15da7f59cc72b6b5023f"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydevd_frame_eval/pydevd_frame_tracing.py",
+          "bytes": 4339,
+          "sha256": "74781b6d3d31c2848fa0aa6d054c5c411f4a3cd2bd727fa90461f31d16fbcd2e"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydevd_frame_eval/pydevd_modify_bytecode.py",
+          "bytes": 13908,
+          "sha256": "a128873ec68bf5c0ecd666ef73a58f1843c75f31a612878ee59934e569c4dc14"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydevd_frame_eval/release_mem.h",
+          "bytes": 84,
+          "sha256": "7b8139527301488e03f8470b143394fbc91a290cb8bbd5a0cd467691967103de"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydevd_frame_eval/vendored/README.txt",
+          "bytes": 717,
+          "sha256": "d5d8f3f7570673c7d6cbebc5b3ea4981fb549ecac7fc38bf05fcbbd9ed75166b"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydevd_frame_eval/vendored/__init__.py",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydevd_frame_eval/vendored/pydevd_fix_code.py",
+          "bytes": 1806,
+          "sha256": "c238b736c5db2081517298bc4b093141062958ebdbd8214d4bb79877119ecb2d"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydevd_frame_eval/vendored/bytecode/__init__.py",
+          "bytes": 4284,
+          "sha256": "05081a005e097a99ebca8572c599e2f4e9fb5b15f272572e1cc396a72114b92c"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydevd_frame_eval/vendored/bytecode/bytecode.py",
+          "bytes": 7259,
+          "sha256": "b097b537414a85f6876d158bc4bbb1c7e67c25e008d5d18f33b95aaa1af23c9b"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydevd_frame_eval/vendored/bytecode/cfg.py",
+          "bytes": 15543,
+          "sha256": "d1e296c1945d658a3088ba09bb5e021765ada3a3c88c600bd59c4eb0a50fd0f9"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydevd_frame_eval/vendored/bytecode/concrete.py",
+          "bytes": 22799,
+          "sha256": "9b6357933be18d70e13c2d97400c0930958bd327cd951f2ed9be2b804acc558a"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydevd_frame_eval/vendored/bytecode/flags.py",
+          "bytes": 5972,
+          "sha256": "f5bb8b9a2fad9501a77bd26e45ecef3cc7616fee0dc055e348bee83397c79069"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydevd_frame_eval/vendored/bytecode/instr.py",
+          "bytes": 11664,
+          "sha256": "4ecae971e8538b54ba7bdf32d3d3b6ac33fe1e00f7fa2ae2e59e80fa633bb039"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydevd_frame_eval/vendored/bytecode/peephole_opt.py",
+          "bytes": 16184,
+          "sha256": "50af0baa27b98dd2cec17236077ab6babc85520931afc5bb75c6183098d36050"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydevd_frame_eval/vendored/bytecode/tests/__init__.py",
+          "bytes": 5094,
+          "sha256": "bf4ddbdfc2e23df13a6d7953fd0c16d98810d099e70358548df640ab1b2b21df"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydevd_frame_eval/vendored/bytecode/tests/test_bytecode.py",
+          "bytes": 16365,
+          "sha256": "200ce8550c0d475c8a603276bb701f6e799a6078c70e5afec226c9011ad1bf93"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydevd_frame_eval/vendored/bytecode/tests/test_cfg.py",
+          "bytes": 29071,
+          "sha256": "6605e2c083ed5c93c99bb0e87c8bacd8ace78b132f38156df7766fedb5c6129c"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydevd_frame_eval/vendored/bytecode/tests/test_code.py",
+          "bytes": 2518,
+          "sha256": "25d108833f3cebe83187e24fd714be52dd53815eb0d2fcdc7bae56d25457734b"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydevd_frame_eval/vendored/bytecode/tests/test_concrete.py",
+          "bytes": 50807,
+          "sha256": "338074b6a4fb31a1c2f30c74d6f1abf6071ea74888ddff854961ceab0f3901f1"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydevd_frame_eval/vendored/bytecode/tests/test_flags.py",
+          "bytes": 6164,
+          "sha256": "a33958b8e31f872aeaab70b4ce6096c83032717ef4388e67feaec2eaef4a9562"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydevd_frame_eval/vendored/bytecode/tests/test_instr.py",
+          "bytes": 11888,
+          "sha256": "af4d0455a8c5e0e11bb987d3e24921ed7630daae80382c290c0d43bff4e283ab"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydevd_frame_eval/vendored/bytecode/tests/test_misc.py",
+          "bytes": 7275,
+          "sha256": "d1eec2699214298caab3a21936ad557158e6550aa798dfcc8dec9f67a91c86e4"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydevd_frame_eval/vendored/bytecode/tests/test_peephole_opt.py",
+          "bytes": 33840,
+          "sha256": "5458293bf45640966d36f09500cd4dada394e012528df906bf0b54c9f9f756d0"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydevd_frame_eval/vendored/bytecode/tests/util_annotation.py",
+          "bytes": 478,
+          "sha256": "c738a1143e5d866736c02d5f12534c9f05caf469e922a43af57de2183a378bb2"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydevd_sys_monitoring/_pydevd_sys_monitoring.py",
+          "bytes": 79678,
+          "sha256": "a4cdb904c10a7e3ca18c8748614c1bf9b58fa319ab944a317e734b120564af54"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydevd_sys_monitoring/_pydevd_sys_monitoring_cython.c",
+          "bytes": 2012221,
+          "sha256": "612fecb49fc746d832943c20fe9f533feef582d8c885a8ece35358d88320c401"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydevd_sys_monitoring/_pydevd_sys_monitoring_cython.cp312-win_amd64.pyd",
+          "bytes": 282448,
+          "sha256": "fba81cd17c14de056f87a43171228143b055abcda90a0e537b94ae29741c1b6d"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydevd_sys_monitoring/_pydevd_sys_monitoring_cython.pxd",
+          "bytes": 2385,
+          "sha256": "f23a523f5678c2242ce2916354219e37bf6088cb7255eb27eee39c5d85d17d4a"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydevd_sys_monitoring/_pydevd_sys_monitoring_cython.pyx",
+          "bytes": 80404,
+          "sha256": "2a53b493492227618fe48a9d5c845ebc2f46758d2d852412b3a8241fd0370b36"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydevd_sys_monitoring/pydevd_sys_monitoring.py",
+          "bytes": 565,
+          "sha256": "176bc327a3c5ce1ca2bad2120e30eac4a8eb79a308a944d0e215949e661ee5d0"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/pydev_ipython/README",
+          "bytes": 546,
+          "sha256": "765fc9b0f9233354f5e194476534ef4de685a32a3dd42d088dfb5f6b618e0e77"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/pydev_ipython/__init__.py",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/pydev_ipython/inputhook.py",
+          "bytes": 20592,
+          "sha256": "3a1cd2b48f7a1fc919801a49765046fe98520bb2203fb542e1e63f1cc9ede46c"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/pydev_ipython/inputhookglut.py",
+          "bytes": 5769,
+          "sha256": "275d7b9d68f0da56e833959965fc5faa59d2ccdd7f665036a2cf9a173c82fae9"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/pydev_ipython/inputhookgtk.py",
+          "bytes": 1151,
+          "sha256": "a5c47315751ee53db7a43cab5c7ead7a6f85d505d7c625b931e4d35e72dcaa3b"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/pydev_ipython/inputhookgtk3.py",
+          "bytes": 1149,
+          "sha256": "75fa949362d4777e458d744b53608262f6c0a01164138d26d7a6c86a08dd9159"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/pydev_ipython/inputhookpyglet.py",
+          "bytes": 3359,
+          "sha256": "d31d5222baa3504ecc96ffbdd71cd5dab83cd6025676684f4833efdeb61656d9"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/pydev_ipython/inputhookqt4.py",
+          "bytes": 7449,
+          "sha256": "9a012abbbd527b1f731abad8565b2b252acabd39f4b092aae3a7bec18f820bfb"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/pydev_ipython/inputhookqt5.py",
+          "bytes": 7498,
+          "sha256": "607ea13526c05c6e80b60ad75cfa25ed31dc8ed637e424263ea726e66cd38dbf"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/pydev_ipython/inputhookqt6.py",
+          "bytes": 7533,
+          "sha256": "c1876d1e405cc1981d84a261419942ad5dba0caa0455f02079e63cf8804a6cb2"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/pydev_ipython/inputhooktk.py",
+          "bytes": 779,
+          "sha256": "555bdc63980ccefcbc13ba44523aa88f8ef93769fd857afcf7141e8dca1f880c"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/pydev_ipython/inputhookwx.py",
+          "bytes": 6700,
+          "sha256": "b0070e1f4f83ee2bdb4d35c9ce3db0d73d5fe5f4daa2063420c2f16f41dcbe1b"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/pydev_ipython/matplotlibtools.py",
+          "bytes": 6647,
+          "sha256": "85786ceca9f9fdfe5e87fd61facdd18e87804c72f9407bedbf819f4b1f8cb3cf"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/pydev_ipython/qt.py",
+          "bytes": 896,
+          "sha256": "cf634eda7c02728e979c8a125340496495f8f154feec3b509c43ff9d566efa84"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/pydev_ipython/qt_for_kernel.py",
+          "bytes": 4089,
+          "sha256": "6b128dfc338683e3f6a4c468e83039425240488a4a57407ef83b4dc545cc0b45"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/pydev_ipython/qt_loaders.py",
+          "bytes": 10906,
+          "sha256": "113ac74bfd269a2a1e5e0c3fa026a32be85b6e08f531794fa80c82420807311d"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/pydev_ipython/version.py",
+          "bytes": 1546,
+          "sha256": "a9677a319666fbf7050e3a876324914d24a60807b0c421ca862fb86a8c9a001f"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/pydev_sitecustomize/__not_in_default_pythonpath.txt",
+          "bytes": 21,
+          "sha256": "86791302ec52156fd38a5830d01b754552eb7c6444de16230264cf9b593eb1cf"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/pydev_sitecustomize/sitecustomize.py",
+          "bytes": 9913,
+          "sha256": "fad0efe5b3f52613a9a0a158a6821caa027b0e0dcde620366ae28007865cc452"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/pydevd_attach_to_process/README.txt",
+          "bytes": 987,
+          "sha256": "3424f34186d417d6e1c284f3f895b39f02dcc5c503bbb3e670fba4ee9f7f9c98"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/pydevd_attach_to_process/_always_live_program.py",
+          "bytes": 727,
+          "sha256": "20b7a86418aa27384e193edf54ee581392cf7301b678c6b294bde7ceaa173f13"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/pydevd_attach_to_process/_check.py",
+          "bytes": 139,
+          "sha256": "fd67e79d18208988d064058440aa508095752cceca5cb3fdd6989d02be21bf22"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/pydevd_attach_to_process/_test_attach_to_process.py",
+          "bytes": 310,
+          "sha256": "d848ebbed36d12a5b486210f7ca6caf98067907e244cd7e606e8c17a58e8c117"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/pydevd_attach_to_process/_test_attach_to_process_linux.py",
+          "bytes": 2638,
+          "sha256": "6749c331e59b19deb8b28ad8a8a8a6f810fc67cf4f5451637dd28c02de751f18"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/pydevd_attach_to_process/add_code_to_python_process.py",
+          "bytes": 24787,
+          "sha256": "fbe038ea5d7cf714c76c520a2ab25d5555c6e5d48fd4d95a521f5ae86913ee57"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/pydevd_attach_to_process/attach_amd64.dll",
+          "bytes": 45904,
+          "sha256": "e3413fa56453a33c55b759a8e3bf564768d6ce2cc155b3f608c707b5a9c9bbf5"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/pydevd_attach_to_process/attach_amd64.pdb",
+          "bytes": 1003520,
+          "sha256": "86502f89442e129fd742c3f62545342c9302e1af2e3ee497f7ee60ab47f6ae8d"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/pydevd_attach_to_process/attach_pydevd.py",
+          "bytes": 2674,
+          "sha256": "03b13134374af4dc70e8332fdad6440c3f639505a18a978e4eb3b71b8135a00a"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/pydevd_attach_to_process/attach_script.py",
+          "bytes": 8228,
+          "sha256": "8600d5bd4a0b95298ae339135f072a517b027680e7757c885f9e76be164bab88"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/pydevd_attach_to_process/attach_x86.dll",
+          "bytes": 41296,
+          "sha256": "68092a75b41d9637f14f032049ef3ffbd1000200d0e139f8d0822ccf9c60c1ea"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/pydevd_attach_to_process/attach_x86.pdb",
+          "bytes": 1036288,
+          "sha256": "f6d31d30602b695d85516dbfadb4d4218574f49407203cac32ffb33f3ab57d7b"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/pydevd_attach_to_process/inject_dll_amd64.exe",
+          "bytes": 276304,
+          "sha256": "4e602b4b072737105dd696b6aae8f8de7316b107ae501905e6f361f63ac41bdc"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/pydevd_attach_to_process/inject_dll_amd64.pdb",
+          "bytes": 5779456,
+          "sha256": "6f54c9733f4c9a96513e360e32a44baa894e031a30d856d12500aa8e57c8ab27"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/pydevd_attach_to_process/inject_dll_x86.exe",
+          "bytes": 220024,
+          "sha256": "e12e90e22d8a66806fcf0d84e713485b740933d2c9ba5dd0beeba8b6d0ccafbf"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/pydevd_attach_to_process/inject_dll_x86.pdb",
+          "bytes": 5902336,
+          "sha256": "dd0e14a93e5fecf957ef042977b52bea4bc93349f4fb7e9ed113289ed7e71ac0"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/pydevd_attach_to_process/run_code_on_dllmain_amd64.dll",
+          "bytes": 27984,
+          "sha256": "54335e10db9155c9a04c22ecbebbbfe9396bef2d1995d06d9203b9dcf8325b52"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/pydevd_attach_to_process/run_code_on_dllmain_amd64.pdb",
+          "bytes": 798720,
+          "sha256": "831b8ee4564960147be8358a900cedf836562dfccbfb0ab06487fe8257b82199"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/pydevd_attach_to_process/run_code_on_dllmain_x86.dll",
+          "bytes": 24440,
+          "sha256": "318234915106b7ed26aa2098a12de44dfa762888e64ddc646f634c32c8f85da5"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/pydevd_attach_to_process/run_code_on_dllmain_x86.pdb",
+          "bytes": 798720,
+          "sha256": "73680253862ef1ebd9c795ed7131604d3a6a867c77d5fea1fb96eebb27399d76"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/pydevd_attach_to_process/common/py_custom_pyeval_settrace.hpp",
+          "bytes": 8591,
+          "sha256": "79e98be9acefda26458c94d6a19c071b49b83ab9c1c70bad21a5628527904b79"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/pydevd_attach_to_process/common/py_custom_pyeval_settrace_310.hpp",
+          "bytes": 4174,
+          "sha256": "808f08a5f0b3948b5ef98660d72851208418c2873777dff33ddbbb47a55c4cbd"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/pydevd_attach_to_process/common/py_custom_pyeval_settrace_311.hpp",
+          "bytes": 4388,
+          "sha256": "491cccd653b5b76684c5b4de6ad89e7b6af75864d7d6f14c18c335ebdf70aecf"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/pydevd_attach_to_process/common/py_custom_pyeval_settrace_common.hpp",
+          "bytes": 1931,
+          "sha256": "56bfbc154078e3b257a3353b0e08666ea70bc54801d5c791bba447c755c59c3c"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/pydevd_attach_to_process/common/py_settrace.hpp",
+          "bytes": 7875,
+          "sha256": "9625d555b60601bd533758be13d727582f7c7ee754c6228571dac934c694889b"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/pydevd_attach_to_process/common/py_utils.hpp",
+          "bytes": 3949,
+          "sha256": "96a51b8a35e1aff26f1d616e80d18e01246c5a3d3ddb41188069b2fce9d933da"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/pydevd_attach_to_process/common/py_version.hpp",
+          "bytes": 3313,
+          "sha256": "a15ff80e8b6e106da3d91b4d35c68e3eee13403adfd6561d07c536646fea66bb"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/pydevd_attach_to_process/common/python.h",
+          "bytes": 22335,
+          "sha256": "d6f71bd096cddd23d9e43e174bcc9281f166b8505ee228fc71d76921906135b7"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/pydevd_attach_to_process/common/ref_utils.hpp",
+          "bytes": 1537,
+          "sha256": "40dd174ef884cd4d5e562c2f893b04ca0ea3f31ea052a6c96f3b86b2b1f5a9af"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/pydevd_attach_to_process/linux_and_mac/.gitignore",
+          "bytes": 86,
+          "sha256": "a97347a8680dbfd83fdd2ea3fb853ed42ac485cd3e6e7bf75dacfafb4ecc37c4"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/pydevd_attach_to_process/linux_and_mac/attach.cpp",
+          "bytes": 3814,
+          "sha256": "032865d44079845c6fea1a1c93b03221b6d4f0251ec703006290b71ce8c0ec3e"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/pydevd_attach_to_process/linux_and_mac/compile_linux.sh",
+          "bytes": 353,
+          "sha256": "fdd1a385b01dbe60188ccf541f8a2779bdc4e80dc9a49bdffdf16834f88e4371"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/pydevd_attach_to_process/linux_and_mac/compile_mac.sh",
+          "bytes": 713,
+          "sha256": "2b16d58dedceac80ff2c5e2b9f5ed0a80063e8ff27a24c996a9723652e0f3b6f"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/pydevd_attach_to_process/linux_and_mac/compile_manylinux.cmd",
+          "bytes": 683,
+          "sha256": "057bcb8a2f735dc4dbf49fc1bb0cc5b6d57165cbbf1cc1e9e7476dd8009a122f"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/pydevd_attach_to_process/linux_and_mac/lldb_prepare.py",
+          "bytes": 1734,
+          "sha256": "2fbeb431d244897dd52c58519971c130f8851f840eb0837c9a5403b5f7cb8805"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/pydevd_attach_to_process/winappdbg/__init__.py",
+          "bytes": 7129,
+          "sha256": "3b53cb23a2d19aa2f8323a4a5d9750d88d1223429a357b504a24a1c6dd7720ad"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/pydevd_attach_to_process/winappdbg/breakpoint.py",
+          "bytes": 169870,
+          "sha256": "21bcee474c1e3e1cf522a0b3e13242546f2fd5a714909a954ac648ed31b042d1"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/pydevd_attach_to_process/winappdbg/compat.py",
+          "bytes": 5470,
+          "sha256": "4a918ee2673bb1d283baa86611bfd6473e4ddd74c1b738b0cda95b1b21e4a9d3"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/pydevd_attach_to_process/winappdbg/crash.py",
+          "bytes": 66661,
+          "sha256": "b31f76553068ac8511dce67ca63410000f357f29e15182c45c0fff0ab5c514ef"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/pydevd_attach_to_process/winappdbg/debug.py",
+          "bytes": 59169,
+          "sha256": "67bfdb7945cbcf4335043be3e8e0c517b54c477c32008dfee87819d031f1f5e1"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/pydevd_attach_to_process/winappdbg/disasm.py",
+          "bytes": 25071,
+          "sha256": "7a6fcab38a399ba9b6efb47f540163d1de0bbc3b79f1c0dd710e148f1a299f95"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/pydevd_attach_to_process/winappdbg/event.py",
+          "bytes": 67007,
+          "sha256": "426b61fc57c2d3d5b66afec3b8738ba667c817ddc36707e4d2c9932f32872cfb"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/pydevd_attach_to_process/winappdbg/interactive.py",
+          "bytes": 85925,
+          "sha256": "942255704fd797a6bdf813c7ac49a5b4eb4914be611fcfd4f3dfc4d05a95047f"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/pydevd_attach_to_process/winappdbg/module.py",
+          "bytes": 71737,
+          "sha256": "9175fa15558260ab7ee94abb5dbc3f7282f6d62796ad24e7ef520ab305d35816"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/pydevd_attach_to_process/winappdbg/process.py",
+          "bytes": 184565,
+          "sha256": "e12d36f27aa8e5b1e0b8a966bba504a9a71117ee0e085e8de04ef1f904dfd31d"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/pydevd_attach_to_process/winappdbg/registry.py",
+          "bytes": 22132,
+          "sha256": "556d9a763e5df52344ddb352ef779439e66ae06520c5acd5c68c6e4fa944c1ce"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/pydevd_attach_to_process/winappdbg/search.py",
+          "bytes": 23902,
+          "sha256": "3efee229c5389f79db1d3770840689e383fef11bcaa0d27cbdce96d60942421b"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/pydevd_attach_to_process/winappdbg/sql.py",
+          "bytes": 34668,
+          "sha256": "64c8a323fb646166970361ef8efa45eecef421c51d78e0667cf3483f2cef8e39"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/pydevd_attach_to_process/winappdbg/system.py",
+          "bytes": 45621,
+          "sha256": "9ed99dc863c2b6c06d143e43e777b3d7588111a55b558122a594e97ab6756d99"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/pydevd_attach_to_process/winappdbg/textio.py",
+          "bytes": 61387,
+          "sha256": "89b56ef3ad93422cbed0d43c2d9980f0429b0952a39facaa40ddae0b60d86bfc"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/pydevd_attach_to_process/winappdbg/thread.py",
+          "bytes": 76790,
+          "sha256": "9ab2d4bb4a092f361b54a8f0aeb62a469ed91920d29fd313cf7a1c8cd67176a2"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/pydevd_attach_to_process/winappdbg/util.py",
+          "bytes": 36978,
+          "sha256": "7c2ce9a23cb0082b0681056d0b70a2bceb80f2729923f84a8a6fdb4272ca235f"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/pydevd_attach_to_process/winappdbg/window.py",
+          "bytes": 24770,
+          "sha256": "40c802fcbdb22b2844af24523972e6b43c17c3d8a1d56f97743d1626f686932b"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/pydevd_attach_to_process/winappdbg/win32/__init__.py",
+          "bytes": 2885,
+          "sha256": "b0d6a6e9934e69fabc57e07197c3f801a48b27c9979e1d10207f2527eeeec0c2"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/pydevd_attach_to_process/winappdbg/win32/advapi32.py",
+          "bytes": 122129,
+          "sha256": "c6af52dc066f1bd9b213c5fbcea1f1c5eb49637426f6287fc2428982feb04988"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/pydevd_attach_to_process/winappdbg/win32/context_amd64.py",
+          "bytes": 24465,
+          "sha256": "3580afe67ccd0a4c4c1975782ecc3f492816e1c51bc6c4b093a900e3bbc51561"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/pydevd_attach_to_process/winappdbg/win32/context_i386.py",
+          "bytes": 15869,
+          "sha256": "213c579240dcbd26bfaeb4ce3d24652bd8193e827eb167e3fdf1c441baef0c17"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/pydevd_attach_to_process/winappdbg/win32/dbghelp.py",
+          "bytes": 46365,
+          "sha256": "4622b119ff18e66769231812302b15a97cc562fef6b31fe7b5e28d10d5b83338"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/pydevd_attach_to_process/winappdbg/win32/defines.py",
+          "bytes": 21637,
+          "sha256": "99b1442b14c33aab4a4a5842074b2bf241ccf6a0c675dfbe5576156860c0c5e6"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/pydevd_attach_to_process/winappdbg/win32/gdi32.py",
+          "bytes": 14681,
+          "sha256": "ef8a889b767fa03cf762c95028c1e014a6616868021dd88e51206fbb5ff2b169"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/pydevd_attach_to_process/winappdbg/win32/kernel32.py",
+          "bytes": 163857,
+          "sha256": "319c3a4a9448626b75a26989b6917e162b7a66dd56ed6f9cd5648268d666af8b"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/pydevd_attach_to_process/winappdbg/win32/ntdll.py",
+          "bytes": 21132,
+          "sha256": "460718e87588949d7a6ae80a88ba2521e9a10108f698eaf8110ffbfaf3afb62d"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/pydevd_attach_to_process/winappdbg/win32/peb_teb.py",
+          "bytes": 139565,
+          "sha256": "b1877f2f745faec8683502de97ec4a19208ac3c645c505420d3209862bc42711"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/pydevd_attach_to_process/winappdbg/win32/psapi.py",
+          "bytes": 14115,
+          "sha256": "032626d61ba5876db31b5223ec7e0a776288fc384e7715a38a5e131797607c2d"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/pydevd_attach_to_process/winappdbg/win32/shell32.py",
+          "bytes": 13176,
+          "sha256": "80a089ff7653f7a98dcd6100b1625bacbae6e0a9747053fc7b057d468e98e3bf"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/pydevd_attach_to_process/winappdbg/win32/shlwapi.py",
+          "bytes": 26209,
+          "sha256": "c0eeb399c357c6d77e76cbd0969bbe3b36561a770b41e92ed83fa89b53d6df16"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/pydevd_attach_to_process/winappdbg/win32/user32.py",
+          "bytes": 53270,
+          "sha256": "ed3e2ca2fcb493bd0d44b4ef6e336744705befb91ac54681a6d3e29655a71b6e"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/pydevd_attach_to_process/winappdbg/win32/version.py",
+          "bytes": 34919,
+          "sha256": "a5eaacbf302de37fd1906d9d2eeb5ed073a1cc41128d878123d4024bc1fd9d5b"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/pydevd_attach_to_process/winappdbg/win32/wtsapi32.py",
+          "bytes": 11136,
+          "sha256": "939dd218fed1c044df89c1d2511b289f0f2ce9462b7a54ccc150da336e42f274"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/pydevd_attach_to_process/windows/attach.cpp",
+          "bytes": 28624,
+          "sha256": "a7fdd07bc0ea9ac49f0cc20893b1f0b08ae4115f6ee5af5293cc4fe5c5ab0081"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/pydevd_attach_to_process/windows/attach.h",
+          "bytes": 1902,
+          "sha256": "0d36d8197c3f70d585e0b550faf5c251d36c5239ee440e5966a8a59644a25263"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/pydevd_attach_to_process/windows/compile_windows.bat",
+          "bytes": 2263,
+          "sha256": "3a4364ac1613e931c62423e24a95e5d228730cd6d96849079a3cefae27884648"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/pydevd_attach_to_process/windows/inject_dll.cpp",
+          "bytes": 4925,
+          "sha256": "327b346c8641324ed40966b91baefda6333662c7f47085edcd9438a7f2d7252d"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/pydevd_attach_to_process/windows/py_win_helpers.hpp",
+          "bytes": 2555,
+          "sha256": "d3c3e4871d8964761ec3c409d0a53a3edc540a07bd8687a69a70f4f41cf21b47"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/pydevd_attach_to_process/windows/run_code_in_memory.hpp",
+          "bytes": 3470,
+          "sha256": "c00ae74c2ec8f5d84c5dff99be4f3da4bde94ba4c73f14deabd63a24bfa2f00c"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/pydevd_attach_to_process/windows/run_code_on_dllmain.cpp",
+          "bytes": 2594,
+          "sha256": "27c94fe8bc8035512ed63f676cf5a835912512dadeacf0f08407f9b3454d9833"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/pydevd_attach_to_process/windows/stdafx.cpp",
+          "bytes": 1021,
+          "sha256": "57ba748116dfdaf6c5139e9aac66431041842c0c582efa1509509ba6ec9cd6e2"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/pydevd_attach_to_process/windows/stdafx.h",
+          "bytes": 1198,
+          "sha256": "2a94293ded391850bf57fa18bed08ebe9ffe1487b60307605e353529c3abedda"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/pydevd_attach_to_process/windows/targetver.h",
+          "bytes": 1035,
+          "sha256": "8c5919d5736ffa584c15b1a798f39cf5cd09818811c6555969ea069efa1f82fb"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/pydevd_plugins/__init__.py",
+          "bytes": 70,
+          "sha256": "63d7753d1fd95c6e949bf7db76baeb63151dd7a34a1fb762958ac928ce138ec9"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/pydevd_plugins/django_debug.py",
+          "bytes": 22908,
+          "sha256": "bcd0e1c94fb8d5f721fd2a40a911feff49fdb775a23f2afe58e6435b48d6d10a"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/pydevd_plugins/jinja2_debug.py",
+          "bytes": 19571,
+          "sha256": "95c76fc837e11e7333982df57afa2eb0c6a33d63d8ac56af6d9fd5cb48f6c3f7"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/pydevd_plugins/pydevd_line_validation.py",
+          "bytes": 6774,
+          "sha256": "fea7ecb4060e6afa129c82eaa1d51a405b8cf2fd334af224e890284ca520fd1f"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/pydevd_plugins/extensions/README.md",
+          "bytes": 1212,
+          "sha256": "088e645de96ceb8a87ae1b808ffbabe6733f55649ce6a55da8a2bfcb17e110fc"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/pydevd_plugins/extensions/__init__.py",
+          "bytes": 70,
+          "sha256": "63d7753d1fd95c6e949bf7db76baeb63151dd7a34a1fb762958ac928ce138ec9"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/pydevd_plugins/extensions/types/__init__.py",
+          "bytes": 70,
+          "sha256": "63d7753d1fd95c6e949bf7db76baeb63151dd7a34a1fb762958ac928ce138ec9"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/pydevd_plugins/extensions/types/pydevd_helpers.py",
+          "bytes": 668,
+          "sha256": "b5548b3e4933ef65cffe8641eb977c836412c96c3db3fc42e8f25601fe26e3ac"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/pydevd_plugins/extensions/types/pydevd_plugin_numpy_types.py",
+          "bytes": 3340,
+          "sha256": "7f1aa0ee653addb9929ee7c872bd494f22f3a59f36f8ba6309f584f36686edb4"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/pydevd_plugins/extensions/types/pydevd_plugin_pandas_types.py",
+          "bytes": 6753,
+          "sha256": "537f175d60085801ea0b606daf72ab74355f6cb9ce38033348ce48490edde5f4"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/pydevd_plugins/extensions/types/pydevd_plugins_django_form_str.py",
+          "bytes": 556,
+          "sha256": "be669e45bcdcec46ad6109127fb4e5aa7b015fba067758405c8847e4f53af89e"
+        },
+        {
+          "name": "debugpy/adapter/__init__.py",
+          "bytes": 360,
+          "sha256": "f552d8ba52c660727ca0525e8e9b4db399af594daaa806e9848a9719f57cee0c"
+        },
+        {
+          "name": "debugpy/adapter/__main__.py",
+          "bytes": 8912,
+          "sha256": "55cea3a42d51b0cdfda95f2f1e21ef3bb7c1fcaa2fa0ffe89880f70a7cf22abd"
+        },
+        {
+          "name": "debugpy/adapter/clients.py",
+          "bytes": 33933,
+          "sha256": "17e91243c6b6fb5c67cbbc2e018416c8cf1957fe1fdc2fac26554d86f761eb86"
+        },
+        {
+          "name": "debugpy/adapter/components.py",
+          "bytes": 6741,
+          "sha256": "3dbc11545396b04ebf8e16cc6119d513de44330525f91efa233976934e61607e"
+        },
+        {
+          "name": "debugpy/adapter/launchers.py",
+          "bytes": 8621,
+          "sha256": "ae36966c0a5a72add434bcf68148a963bc1ff28ce0fd308d2a30be6e6c3d571e"
+        },
+        {
+          "name": "debugpy/adapter/servers.py",
+          "bytes": 25919,
+          "sha256": "9dd1ace8c0681e9ea1aa6ce3e8c564e50f74641aa6075a569e1c17fac807afa9"
+        },
+        {
+          "name": "debugpy/adapter/sessions.py",
+          "bytes": 11957,
+          "sha256": "659b4a0aa2efc49e1ae52cda287234bd409147c1a8e8c68c6a709d0d74e38a48"
+        },
+        {
+          "name": "debugpy/common/__init__.py",
+          "bytes": 627,
+          "sha256": "2893ca9934bfeac05671e8418adb29c7831bcbd0d4ceadc539cefb1b472557a1"
+        },
+        {
+          "name": "debugpy/common/json.py",
+          "bytes": 10383,
+          "sha256": "13996643e481bccf37e7b3090cb8622220f4276f2232dcea22468a09de9b9568"
+        },
+        {
+          "name": "debugpy/common/log.py",
+          "bytes": 12607,
+          "sha256": "51c004fb5c5ac8a68e67831cc0a9851ed4120a379150b55041571892fe0aa84c"
+        },
+        {
+          "name": "debugpy/common/messaging.py",
+          "bytes": 61480,
+          "sha256": "40668bd8ace9837ecfa2043ed6d6783822de08420b4eaa99bcbca26fae03d160"
+        },
+        {
+          "name": "debugpy/common/singleton.py",
+          "bytes": 8327,
+          "sha256": "875a93cf3f51b3d13ca002542431b10369a470bfdc85660488324f3d677bd942"
+        },
+        {
+          "name": "debugpy/common/sockets.py",
+          "bytes": 6479,
+          "sha256": "cf7356222a547dd68af1b9d776081f26bda01c830d12a53b54676b95b4cdca64"
+        },
+        {
+          "name": "debugpy/common/stacks.py",
+          "bytes": 1588,
+          "sha256": "1af4dc2776494cfeefcf3c69c7a265ac70261f0ab2e68cf583eefa6d4dfce90c"
+        },
+        {
+          "name": "debugpy/common/timestamp.py",
+          "bytes": 432,
+          "sha256": "d8b5ac61f650706f16e8a67ca9243e1ca3cc7d4d617fd35cf87d696004464602"
+        },
+        {
+          "name": "debugpy/common/util.py",
+          "bytes": 5026,
+          "sha256": "8a699e1a309672d332d85f441c501f15885f60a5ade687290efc2bb4804a531a"
+        },
+        {
+          "name": "debugpy/launcher/__init__.py",
+          "bytes": 958,
+          "sha256": "8d2e0c8fa239a8957d0e49c728dfd6ef2cfbed1d7b869b096d12f9dad137497b"
+        },
+        {
+          "name": "debugpy/launcher/__main__.py",
+          "bytes": 3955,
+          "sha256": "5a046f24b72d86e90ab2207007d61e57de865453466ba538d37b4e72d0d90cca"
+        },
+        {
+          "name": "debugpy/launcher/debuggee.py",
+          "bytes": 9397,
+          "sha256": "6684785c2e06776183382801c48027def941075e9d6ca8d1a561f52b34ac2fc3"
+        },
+        {
+          "name": "debugpy/launcher/handlers.py",
+          "bytes": 5880,
+          "sha256": "276281efbd0ce642a64d5a649c7432c94c135681b65ba09907d2296a6d0bb3b6"
+        },
+        {
+          "name": "debugpy/launcher/output.py",
+          "bytes": 3920,
+          "sha256": "2f88d20fd462f52d51001c40ade3490aff64e160723894ee89b921a908ddf13b"
+        },
+        {
+          "name": "debugpy/launcher/winapi.py",
+          "bytes": 3325,
+          "sha256": "9a75c8ca855cac563b2d91cf0defa648c8300445022591e28a147c8ffd05c58f"
+        },
+        {
+          "name": "debugpy/server/__init__.py",
+          "bytes": 330,
+          "sha256": "b2fa2ecbd2525bd0fe4f2ab6ac00a48efbf38558be40e1c1b0939b721a9e321e"
+        },
+        {
+          "name": "debugpy/server/api.py",
+          "bytes": 14721,
+          "sha256": "f22f62a5354ef626757b8aad63a8ec389fec64a3e2f1c3b579581e7a540b385f"
+        },
+        {
+          "name": "debugpy/server/attach_pid_injected.py",
+          "bytes": 2834,
+          "sha256": "102dbb045c0c55c259ee4463592796e511978af25d8e84614fceba0b48c17a0b"
+        },
+        {
+          "name": "debugpy/server/cli.py",
+          "bytes": 20388,
+          "sha256": "46a343709767850534d83f3c9706dc0b444d1b39ea7b66b5857f26e6100474c3"
+        },
+        {
+          "name": "debugpy-1.8.22.dist-info/licenses/LICENSE",
+          "bytes": 1200,
+          "sha256": "649844f60da138e54b9bcc13338c62c5f97be8612cb6249ac10f84bbb97ffc88"
+        },
+        {
+          "name": "debugpy-1.8.22.dist-info/METADATA",
+          "bytes": 1421,
+          "sha256": "dad0ffa81756bcf79a9ef2961c532e411545c608159378446f087e6a2f2ea41a"
+        },
+        {
+          "name": "debugpy-1.8.22.dist-info/WHEEL",
+          "bytes": 101,
+          "sha256": "547199cfb31450578b25778938b82f94e190e69e750e6c850e3b6d657fa1a30f"
+        },
+        {
+          "name": "debugpy-1.8.22.dist-info/entry_points.txt",
+          "bytes": 100,
+          "sha256": "fd33ab3714fce7006bb3c021dbd8e8e217f3e3268d7c1e6728b69b081e4f568b"
+        },
+        {
+          "name": "debugpy-1.8.22.dist-info/top_level.txt",
+          "bytes": 8,
+          "sha256": "e8e9ba25311aaa45a78fef7eee424e26bf7cf2c4ceea24ae88ae0df57e912e98"
+        },
+        {
+          "name": "debugpy-1.8.22.dist-info/RECORD",
+          "bytes": 35590,
+          "sha256": "ab1f61971a91e94fa6abf2b1e8005d6d49e53d353a8eaad17bb4030cc6b6faac"
+        }
+      ],
+      "all_native_members": [
+        {
+          "name": "debugpy/_vendored/pydevd/_pydevd_bundle/pydevd_cython.cp312-win_amd64.pyd",
+          "sha256": "b984bfd0c3836e29be2326a09769aaf3616dd804eadac1979dd443dbb42659bf",
+          "bytes": 338256,
+          "pe_machine": "0x8664"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/_pydevd_sys_monitoring/_pydevd_sys_monitoring_cython.cp312-win_amd64.pyd",
+          "sha256": "fba81cd17c14de056f87a43171228143b055abcda90a0e537b94ae29741c1b6d",
+          "bytes": 282448,
+          "pe_machine": "0x8664"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/pydevd_attach_to_process/attach_amd64.dll",
+          "sha256": "e3413fa56453a33c55b759a8e3bf564768d6ce2cc155b3f608c707b5a9c9bbf5",
+          "bytes": 45904,
+          "pe_machine": "0x8664"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/pydevd_attach_to_process/attach_x86.dll",
+          "sha256": "68092a75b41d9637f14f032049ef3ffbd1000200d0e139f8d0822ccf9c60c1ea",
+          "bytes": 41296,
+          "pe_machine": "0x14c"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/pydevd_attach_to_process/inject_dll_amd64.exe",
+          "sha256": "4e602b4b072737105dd696b6aae8f8de7316b107ae501905e6f361f63ac41bdc",
+          "bytes": 276304,
+          "pe_machine": "0x8664"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/pydevd_attach_to_process/inject_dll_x86.exe",
+          "sha256": "e12e90e22d8a66806fcf0d84e713485b740933d2c9ba5dd0beeba8b6d0ccafbf",
+          "bytes": 220024,
+          "pe_machine": "0x14c"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/pydevd_attach_to_process/run_code_on_dllmain_amd64.dll",
+          "sha256": "54335e10db9155c9a04c22ecbebbbfe9396bef2d1995d06d9203b9dcf8325b52",
+          "bytes": 27984,
+          "pe_machine": "0x8664"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/pydevd_attach_to_process/run_code_on_dllmain_x86.dll",
+          "sha256": "318234915106b7ed26aa2098a12de44dfa762888e64ddc646f634c32c8f85da5",
+          "bytes": 24440,
+          "pe_machine": "0x14c"
+        }
+      ],
+      "auxiliary_native_files": [
+        {
+          "name": "debugpy/_vendored/pydevd/pydevd_attach_to_process/attach_amd64.dll",
+          "sha256": "e3413fa56453a33c55b759a8e3bf564768d6ce2cc155b3f608c707b5a9c9bbf5",
+          "bytes": 45904,
+          "pe_machine": "0x8664",
+          "provider_class": "unloaded_official_debugger_attachment_auxiliary"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/pydevd_attach_to_process/attach_x86.dll",
+          "sha256": "68092a75b41d9637f14f032049ef3ffbd1000200d0e139f8d0822ccf9c60c1ea",
+          "bytes": 41296,
+          "pe_machine": "0x14c",
+          "provider_class": "unloaded_official_debugger_attachment_auxiliary"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/pydevd_attach_to_process/inject_dll_amd64.exe",
+          "sha256": "4e602b4b072737105dd696b6aae8f8de7316b107ae501905e6f361f63ac41bdc",
+          "bytes": 276304,
+          "pe_machine": "0x8664",
+          "provider_class": "unloaded_official_debugger_attachment_auxiliary"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/pydevd_attach_to_process/inject_dll_x86.exe",
+          "sha256": "e12e90e22d8a66806fcf0d84e713485b740933d2c9ba5dd0beeba8b6d0ccafbf",
+          "bytes": 220024,
+          "pe_machine": "0x14c",
+          "provider_class": "unloaded_official_debugger_attachment_auxiliary"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/pydevd_attach_to_process/run_code_on_dllmain_amd64.dll",
+          "sha256": "54335e10db9155c9a04c22ecbebbbfe9396bef2d1995d06d9203b9dcf8325b52",
+          "bytes": 27984,
+          "pe_machine": "0x8664",
+          "provider_class": "unloaded_official_debugger_attachment_auxiliary"
+        },
+        {
+          "name": "debugpy/_vendored/pydevd/pydevd_attach_to_process/run_code_on_dllmain_x86.dll",
+          "sha256": "318234915106b7ed26aa2098a12de44dfa762888e64ddc646f634c32c8f85da5",
+          "bytes": 24440,
+          "pe_machine": "0x14c",
+          "provider_class": "unloaded_official_debugger_attachment_auxiliary"
+        }
+      ]
+    },
+    "arm64": {
+      "native_target_machine": "0xaa64",
+      "producer_kind": "official_sdist_requires_normal_source_build",
+      "official_cp312_Windows_ARM64_wheel_exists": false,
+      "source_archive": {
+        "filename": "debugpy-1.8.22.tar.gz",
+        "url": "https://files.pythonhosted.org/packages/44/9d/3cb6693342acf96802dba89934a5b8da43c201d764ebd1f2c0514a3d42bd/debugpy-1.8.22.tar.gz",
+        "sha256": "e489c7268e1c7b41e13b438d9c533d2a7af73fb59bf8cd30fead8286c1c39c4e",
+        "bytes": 1710877
+      },
+      "auxiliary_native_files": [],
+      "source_package_contains_prebuilt_attach_PE": false,
+      "normal_source_build_executed_here": false,
+      "acceptance_condition": "The official source contains no prebuilt attachment PE. Normal Windows ARM64 source build is required; its wheel/RECORD must be validated separately. No foreign-architecture attachment exception is declared for ARM64, and no retagged x64 Python extension is accepted."
+    }
+  }
+}

@@ -2,6 +2,7 @@
 import argparse
 import base64
 import csv
+import configparser
 import ctypes
 from ctypes import wintypes as w
 import hashlib
@@ -20,15 +21,56 @@ import sys
 def digest(data):return hashlib.sha256(data).hexdigest()
 def canonical(name):return re.sub(r'[-_.]+','-',name).lower()
 
-def native_consumption_contract(package,imports,contract_sha256,loaded_count,require_bash=False):
+def original_notest_phase(package,extras,contract_sha256,source_bytes,environment,require_bash):
+    allowed=('categories','cddlib','cliquer','cmr','combinat','graphs','gsl','highs','homfly','modules','planarity','plot','rankwidth')
+    assert package in allowed and extras==[] and type(require_bash) is bool and not require_bash
+    assert isinstance(source_bytes,bytes) and digest(source_bytes)==contract_sha256
+    parser=configparser.ConfigParser(interpolation=None);parser.read_string(source_bytes.decode('utf-8'))
+    original=[line.strip() for line in parser.get('tox','envlist').splitlines() if line.strip() and not line.lstrip().startswith('#')]
+    renamed=[re.sub(r'sagepython-.*nopypi-norequirements','py312-norequirements',line) for line in original]
+    assert environment in renamed and environment.endswith('-notest')
+    return {'verified':True,'package':package,'environment':environment,'source_sha256':contract_sha256,'requested_extras':[],'require_bash':False,'mathematical_acceptance_claimed':False}
+
+def native_consumption_contract(package,imports,contract_sha256,loaded_count,require_bash=False,notest_phase=None):
     assert type(loaded_count) is int and loaded_count>=0
     assert type(require_bash) is bool
+    notest=notest_phase is not None
+    if notest:
+        assert isinstance(notest_phase,dict) and notest_phase.get('verified') is True and notest_phase.get('package')==package and package!='glpk' and notest_phase.get('environment','').endswith('-notest') and notest_phase.get('requested_extras')==[] and notest_phase.get('require_bash') is False and not require_bash
+        assert re.fullmatch('[a-f0-9]{64}',notest_phase.get('source_sha256','')) and contract_sha256 is None
     original=(package=='glpk' and imports==['sage.libs.glpk'] and contract_sha256=='88eef253884e879e6c1f81aa19214ea471b5a845b367bfb4cf4a6f99c0fa4eef' and not require_bash)
-    assert original or (package!='glpk' and contract_sha256 is None), 'Only the exact immutable original GLPK namespace-import contract is exempt from native consumption'
-    assert original or loaded_count>0, 'Mathematical suite environment did not load a rebuilt native owner'
-    return {'original_import_only':original,'original_contract_sha256':contract_sha256,'cold_original_namespace':original and loaded_count==0,'candidate_native_consumer_required':not original,'candidate_native_consumer_loaded':loaded_count>0,'mathematical_acceptance_claimed':False,'mathematical_tests_executed':False}
+    assert original or (package!='glpk' and contract_sha256 is None), 'The import-only SHA flag is restricted to the exact original GLPK contract'
+    assert original or notest or (imports and loaded_count>0), 'Mathematical suite environment did not import and load a rebuilt native owner'
+    return {'original_import_only':original,'original_notest':notest,'original_notest_phase':notest_phase,'original_contract_sha256':contract_sha256,'cold_original_namespace':(original or notest) and loaded_count==0,'candidate_native_consumer_required':not(original or notest),'candidate_native_consumer_loaded':loaded_count>0,'mathematical_acceptance_claimed':False,'mathematical_tests_executed':False}
 def windows_system_roots(windows):return [(Path(windows)/name).resolve() for name in ('System32','SysWOW64','WinSxS','SystemArm32')]
 def declared_windows_system_path(path,windows):return any(Path(path).resolve().is_relative_to(folder) for folder in windows_system_roots(windows))
+
+def load_debugger_auxiliary_manifest(path):
+    raw=Path(path).read_bytes()
+    assert digest(raw)=='029cf773201bd7e927bd835c4d1466843e59f3815debebd85fc3b070b1f4370a'
+    value=json.loads(raw)
+    assert value['schema']=='official-debugpy-auxiliary-native-v1' and value['project']=='debugpy' and value['version']=='1.8.22'
+    return value
+
+def debugger_auxiliary_record(manifest,distribution,version,relative,data,target_machine):
+    if canonical(distribution)!='debugpy' or version!=manifest['version']:return None
+    architecture={'0x8664':'x64','0xaa64':'arm64'}[target_machine]
+    producer=manifest['architectures'][architecture]
+    assert producer['native_target_machine']==target_machine
+    matches=[row for row in producer['auxiliary_native_files'] if row['name']==relative]
+    if not matches:return None
+    assert len(matches)==1 and relative.startswith('debugpy/_vendored/pydevd/pydevd_attach_to_process/') and Path(relative).suffix.lower() in ('.dll','.exe')
+    row=matches[0]
+    assert row['provider_class']=='unloaded_official_debugger_attachment_auxiliary' and type(row['bytes']) is int and len(data)==row['bytes'] and digest(data)==row['sha256']
+    offset=struct.unpack_from('<I',data,0x3c)[0]
+    assert data[:2]==b'MZ' and data[offset:offset+4]==b'PE\0\0' and hex(struct.unpack_from('<H',data,offset+4)[0])==row['pe_machine']
+    original=producer.get('wheel',producer.get('source_archive'))
+    return dict(row,distribution='debugpy',version=version,official_source_filename=original['filename'],official_source_sha256=original['sha256'],official_source_url=original['url'],official_metadata_sha256=manifest['metadata_sha256'],native_target_machine=target_machine,mathematical_native_consumer=False)
+
+def require_unloaded_debugger_auxiliaries(auxiliaries,loaded_paths):
+    loaded={str(Path(path).resolve()).casefold() for path in loaded_paths}
+    for row in auxiliaries:assert str(Path(row['path']).resolve()).casefold() not in loaded, ('Cross-architecture debugger auxiliary was loaded into the native process',row['path'])
+    return True
 def verify_public_modules_types(site,expected,records,modules_installed):
     if not modules_installed:return False
     path=Path(site)/'sage/libs/gsl/types.pxd'
@@ -94,12 +136,14 @@ def verify_complete_installed_candidates(site,manifests,installed,records,prefix
             if path.is_symlink() or key not in records or records[key]['sha256']!=digest(path.read_bytes()):raise AssertionError('Unrecorded actual installed Sage source/native file '+str(path))
     return {'passed':True,'installed_candidates':verified,'normal_transformed_installation_members':transformed,'normal_relocated_installation_members':relocated,'pinned_pip_header_schemes':schemes,'actual_prefix':str(prefix),'actual_site':str(site),'actual_Sage_namespace_code_scan_complete':True}
 
-def declared_dependency_graph(distributions,package):
+def declared_dependency_graph(distributions,package,requested_extras=None):
     try:from packaging.requirements import Requirement
     except ImportError:from pip._vendor.packaging.requirements import Requirement
     by_name={canonical(d.metadata['Name']):d for d in distributions}
     if len(by_name)!=len(distributions):raise AssertionError('Duplicate installed distribution names')
-    root='passagemath-'+package.replace('_','-');pending=[(root,'test')];visited=set();edges=[]
+    extras=['test'] if requested_extras is None else requested_extras
+    assert isinstance(extras,list) and all(isinstance(extra,str) and re.fullmatch('[A-Za-z0-9][A-Za-z0-9_-]*',extra) for extra in extras) and len(set(extras))==len(extras)
+    root='passagemath-'+package.replace('_','-');pending=[(root,'')]+[(root,extra) for extra in extras];visited=set();edges=[]
     while pending:
         name,extra=pending.pop()
         if (name,extra) in visited:continue
@@ -116,23 +160,31 @@ def declared_dependency_graph(distributions,package):
             pending.append((dependency,''));pending.extend((dependency,e) for e in requirement.extras)
     return {name for name,extra in visited},edges
 def main():
-    ap=argparse.ArgumentParser();ap.add_argument('--package',required=True);ap.add_argument('--import-module',action='append',required=True);ap.add_argument('--wheel-manifests',type=Path,required=True);ap.add_argument('--provider-manifest',type=Path,required=True);ap.add_argument('--machine',required=True);ap.add_argument('--require-bash-resolution',action='store_true');ap.add_argument('--original-import-only-contract-sha256');ap.add_argument('--output',type=Path,required=True);args=ap.parse_args()
+    ap=argparse.ArgumentParser();ap.add_argument('--package',required=True);ap.add_argument('--import-module',action='append',default=[]);ap.add_argument('--wheel-manifests',type=Path,required=True);ap.add_argument('--provider-manifest',type=Path,required=True);ap.add_argument('--machine',required=True);ap.add_argument('--require-bash-resolution',action='store_true');ap.add_argument('--original-import-only-contract-sha256');ap.add_argument('--original-notest-contract-sha256');ap.add_argument('--requested-extras-json',default='["test"]');ap.add_argument('--expected-known-failures',type=Path);ap.add_argument('--output',type=Path,required=True);args=ap.parse_args()
     assert sys.platform=='win32'
     prefix=Path(sys.prefix).resolve();base=Path(sys.base_prefix).resolve();site=(prefix/'Lib/site-packages').resolve()
     assert prefix!=base and sys.version_info[:3]==(3,12,10)
     assert Path(os.environ['HOME']).resolve()==prefix and os.environ['SAGE_DOC']=='/doesnotexist'
-    assert Path(os.environ['KNOWN_TEST_FAILURES']).resolve()==(Path.cwd()/'known-test-failures.json').resolve()
+    expected_known=(args.expected_known_failures if args.expected_known_failures is not None else Path.cwd()/'known-test-failures.json').resolve()
+    assert expected_known.is_relative_to(Path.cwd().resolve()) and expected_known.name.startswith('known-test-failures') and expected_known.suffix=='.json'
+    assert Path(os.environ['KNOWN_TEST_FAILURES']).resolve()==expected_known
+    extras=json.loads(args.requested_extras_json)
+    assert isinstance(extras,list) and all(isinstance(extra,str) and re.fullmatch('[A-Za-z0-9][A-Za-z0-9_-]*',extra) for extra in extras) and len(set(extras))==len(extras)
+    notest_phase=None
+    if args.original_notest_contract_sha256 is not None:notest_phase=original_notest_phase(args.package,extras,args.original_notest_contract_sha256,(Path.cwd()/'tox.ini').read_bytes(),prefix.name,args.require_bash_resolution)
+    assert args.import_module or notest_phase is not None, 'Empty original imports are restricted to a proven original notest phase'
     for item in sys.path:
         assert item and (Path(item).resolve().is_relative_to(prefix) or Path(item).resolve().is_relative_to(base)),('foreign Python import path',item)
     manifests=json.loads(args.wheel_manifests.read_text());providers=json.loads(args.provider_manifest.read_text())
+    debugger_manifest=load_debugger_auxiliary_manifest(Path(__file__).resolve().parent/'debugpy_native_auxiliary.json')
     expected={}
     for manifest in manifests:
         for row in manifest['files']:
             key=row['name'].replace('/','\\').casefold()
             if key in expected and expected[key]!=row['sha256']:raise AssertionError('Conflicting cross-owner wheel member '+key)
             expected[key]=row['sha256']
-    records={};installed=[];modules_installed=False;external_sources=[];installed_native=[]
-    distributions=list(importlib.metadata.distributions(path=[str(site)]));reachable,dependency_edges=declared_dependency_graph(distributions,args.package)
+    records={};installed=[];modules_installed=False;external_sources=[];installed_native=[];debugger_auxiliaries=[]
+    distributions=list(importlib.metadata.distributions(path=[str(site)]));reachable,dependency_edges=declared_dependency_graph(distributions,args.package,extras)
     candidate_owners={'passagemath-'+name.replace('_','-') for name in ('objects','categories','graphs','rankwidth','cddlib','glpk','highs','planarity','homfly','cliquer','combinat','modules','gsl','plot','cmr','m4ri_m4rie')}
     for distribution in distributions:
         name=distribution.metadata['Name'];version=distribution.version
@@ -151,10 +203,16 @@ def main():
             if algorithm not in ('sha256','sha384','sha512'):raise AssertionError('Unsupported installed digest '+algorithm)
             if base64.urlsafe_b64encode(hashlib.new(algorithm,data).digest()).rstrip(b'=').decode()!=value or len(data)!=int(size):raise AssertionError('Installed RECORD mismatch '+relative)
             digest256=digest(data)
+            auxiliary=None
+            if path.is_relative_to(site):
+                auxiliary=debugger_auxiliary_record(debugger_manifest,name,version,str(path.relative_to(site)).replace('\\','/'),data,args.machine)
+                if auxiliary is not None:debugger_auxiliaries.append(dict(auxiliary,path=str(path),observed_loaded_in_provenance_process=False))
             if path.suffix.lower() in ('.pyd','.dll'):
                 offset=struct.unpack_from('<I',data,0x3c)[0]
-                assert data[:2]==b'MZ' and data[offset:offset+4]==b'PE\0\0' and struct.unpack_from('<H',data,offset+4)[0]==int(args.machine,16),('Installed native dependency PE mismatch',str(path))
-                installed_native.append({'path':str(path),'distribution':name,'version':version,'sha256':digest256,'pe_machine':args.machine})
+                assert data[:2]==b'MZ' and data[offset:offset+4]==b'PE\0\0'
+                actual_machine=hex(struct.unpack_from('<H',data,offset+4)[0])
+                if actual_machine!=args.machine:assert path.suffix.lower()=='.dll' and auxiliary is not None,('Installed native dependency PE mismatch',str(path))
+                installed_native.append({'path':str(path),'distribution':name,'version':version,'sha256':digest256,'pe_machine':actual_machine,'provider_class':'unloaded_official_debugger_attachment_auxiliary' if actual_machine!=args.machine else 'normal_installed_native_provider','native_target_verified':actual_machine==args.machine})
             if key in records and records[key]['sha256']!=digest256:raise AssertionError('Conflicting installed distribution owners')
             records[key]={'sha256':digest256,'distribution':name,'version':version};count+=1
             if path.is_relative_to(site):
@@ -209,11 +267,17 @@ def main():
             kind='base_CPython' if path.is_relative_to(base) else 'declared_SDK' if path.is_relative_to(sdk) else 'normal_MSYS2_runtime'
         else:raise AssertionError('Loaded native provider outside all declared roots: '+str(path))
         loaded.append({'path':str(path),'relative_site_path':relative,'sha256':value,'pe_machine':hex(machine),'provider_class':kind})
-    consumption=native_consumption_contract(args.package,args.import_module,args.original_import_only_contract_sha256,sage_native,args.require_bash_resolution)
+    foreign_debugger_auxiliaries=[row for row in debugger_auxiliaries if row['pe_machine']!=args.machine]
+    require_unloaded_debugger_auxiliaries(foreign_debugger_auxiliaries,[row['path'] for row in loaded])
+    consumption=native_consumption_contract(args.package,args.import_module,args.original_import_only_contract_sha256,sage_native,args.require_bash_resolution,notest_phase)
     source_lock=digest(json.dumps({'installed':installed,'external_sources':external_sources,'dependency_edges':dependency_edges,'installed_native':installed_native},sort_keys=True).encode())
     result={'passed':True,'package':args.package,'python':sys.executable,'version':sys.version,'machine':platform.machine(),'process_machine':process_machine.value,'native_machine':hex(native_machine.value),'emulation':False,'emulation_scope':'This actual mathematical/import-only tox CPython process, not auxiliary Bash/Git executables. Every loaded non-OS provider and candidate wheel PE also has the exact native target machine.','prefix':str(prefix),'base_prefix':str(base),'imported_original_contract_modules':imported,'sys_path':sys.path,'effective_env':{key:os.environ.get(key) for key in ('HOME','SAGE_DOC','KNOWN_TEST_FAILURES','SAGE_LOCAL','DOT_SAGE','PATH','INCLUDE','LIB')},'runtime_cliquer_path':str(expected_cl),'installed_distributions_RECORD_verified':installed,'original_declared_dependency_edges':dependency_edges,'original_declared_test_dependency_source_files':external_sources,'installed_distribution_source_lock_sha256':source_lock,'complete_loaded_native_inventory':loaded,'loaded_rebuilt_owner_files':sage_native,'modules_distribution_present':modules_installed,'public_modules_types_matches_wheel_source_RECORD':types_verified,'public_types_expected_sha256':expected_types,'scope':'Actual effective tox environment before complete mathematical tests; no source overlay'}
     result['all_installed_native_PE_files']=installed_native
+    result['unloaded_cross_architecture_official_debugger_auxiliaries']=foreign_debugger_auxiliaries
+    result['declared_debugger_auxiliary_manifest_sha256']='029cf773201bd7e927bd835c4d1466843e59f3815debebd85fc3b070b1f4370a'
+    result['native_file_inventory_scope']='Every installed .pyd/.dll is checked. Only exact official debugger-attachment DLLs may differ while unloaded; all candidate Python extensions and all actually loaded non-OS files retain the native target machine.'
     result['native_consumption_contract']=consumption
+    result['original_effective_tox_extras']=extras;result['expected_original_known_failures']=str(expected_known)
     result['declared_OS_system_subtrees']=[str(p) for p in os_roots]
     result['complete_installed_candidate_wheel_members']=installed_complete
     if args.require_bash_resolution:
