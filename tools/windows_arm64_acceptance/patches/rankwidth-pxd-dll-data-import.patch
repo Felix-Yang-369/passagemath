@@ -1,0 +1,8 @@
+--- a/src/sage/graphs/graph_decompositions/rankwidth.pxd
++++ b/src/sage/graphs/graph_decompositions/rankwidth.pxd
+@@ -1,4 +1,5 @@
+ # sage_setup: distribution = sagemath-graphs
++# distutils: extra_compile_args = -DRW_DLL=1
+ cdef extern from "rw.h":
+     ctypedef int uint_fast8_t
+     ctypedef int uint_fast32_t

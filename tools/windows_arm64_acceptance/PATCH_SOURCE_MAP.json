@@ -1,0 +1,56 @@
+[
+  {
+    "name": "zlaqr3-split-active-slab.patch",
+    "source": "work\\native-followup-2026-10-30\\lapack\\zlaqr3-split-active-slab.patch",
+    "sha256": "2daec3a606aab919f6b989184e0b0236f2b5127b684101dedf5cdb08120fff8e",
+    "applied_by_ARM_workflow": false,
+    "published_sha256": "2daec3a606aab919f6b989184e0b0236f2b5127b684101dedf5cdb08120fff8e",
+    "newline_normalized": false,
+    "logical_lines_equal_to_archived_patch": true
+  },
+  {
+    "name": "gsl-dll-data-import.patch",
+    "source": "work\\native-followup-2026-10-30\\windows\\patches\\r3\\gsl-dll-data-import.patch",
+    "sha256": "51213264e7cd928cc9f1b0358cb89ce63492b0aef94791ef2aedc279990d8fef",
+    "applied_by_ARM_workflow": false,
+    "published_sha256": "c56961c6dc78f1e1083c354a691bd08bc6120ef73804b6ac4f63b2f5aa9ffb9e",
+    "newline_normalized": true,
+    "logical_lines_equal_to_archived_patch": true
+  },
+  {
+    "name": "gsl-header-windows-macro.patch",
+    "source": "work\\native-followup-2026-10-30\\windows\\patches\\r3\\gsl-header-windows-macro.patch",
+    "sha256": "25ea1245745e292dc04d73004e987a2fe17e6e9fc9825d91cc7af7826ef2533e",
+    "applied_by_ARM_workflow": false,
+    "published_sha256": "24d7fafaae8fde0932bd7aaee2d179c6cb71ff4c4e5ff1d66c87c03910490d30",
+    "newline_normalized": true,
+    "logical_lines_equal_to_archived_patch": true
+  },
+  {
+    "name": "libhomfly-no-printf-n.patch",
+    "source": "work\\native-followup-2026-10-30\\windows\\patches\\r3\\libhomfly-no-printf-n.patch",
+    "sha256": "b45c0cc945177dba8b77e8778399f9f8f935a740959cdefd3fc2df64f7010e83",
+    "applied_by_ARM_workflow": true,
+    "published_sha256": "f820ed86cdc86ffe7b87e0917a8bb67be7d19c30404a579eab6905af7c0068f8",
+    "newline_normalized": true,
+    "logical_lines_equal_to_archived_patch": true
+  },
+  {
+    "name": "rankwidth-pxd-dll-data-import.patch",
+    "source": "work\\native-followup-2026-10-30\\windows\\patches\\r3\\rankwidth-pxd-dll-data-import.patch",
+    "sha256": "dc57ae31a4c61445c872486a1b44653a26b10db9cc3f596753841128717ac86f",
+    "applied_by_ARM_workflow": false,
+    "published_sha256": "f753c1bcbb1c8f70b85e7a951249560b65d480d32a99a7752075cd6c784c7c7f",
+    "newline_normalized": true,
+    "logical_lines_equal_to_archived_patch": true
+  },
+  {
+    "name": "rw-header-dll-data-import.patch",
+    "source": "work\\native-followup-2026-10-30\\windows\\patches\\r3\\rw-header-dll-data-import.patch",
+    "sha256": "b817894a71680be41a9045125075254a1e956dfd8a76f3d41c686d3d89796e9c",
+    "applied_by_ARM_workflow": false,
+    "published_sha256": "f7a705e2f4d83e51890170a1b6d6cc34659cc4a27713cb18e8edb776c9ab3d1b",
+    "newline_normalized": true,
+    "logical_lines_equal_to_archived_patch": true
+  }
+]

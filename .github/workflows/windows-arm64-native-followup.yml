@@ -1,0 +1,72 @@
+name: Bounded native ARM64 follow-up
+
+on:
+  push:
+    branches: [codex/arm-native-accept-20261030]
+    paths:
+      - .github/workflows/windows-arm64-native-followup.yml
+      - tools/windows_arm64_acceptance/**
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  homfly-native-arm64:
+    if: github.repository == 'Felix-Yang-369/passagemath' && github.event.repository.private == false
+    runs-on: windows-11-arm
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - pr: 2973
+            source_run: 39386870328
+          - pr: 2974
+            source_run: 39387023560
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: 3.12.10
+          architecture: arm64
+      - name: Download the exact original native wheels
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          repository: passagemath/passagemath
+          run-id: ${{ matrix.source_run }}
+          name: windows-11-arm-auto-wheels
+          path: ${{ runner.temp }}/arm-original-wheels
+          github-token: ${{ github.token }}
+      - name: Download original pure Python build dependencies
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          repository: passagemath/passagemath
+          run-id: ${{ matrix.source_run }}
+          name: noarch-wheels-windows
+          path: ${{ runner.temp }}/arm-original-wheels
+          github-token: ${{ github.token }}
+      - name: Download the exact native SDK
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          repository: passagemath/passagemath
+          run-id: ${{ matrix.source_run }}
+          name: sage-local-windows-11-arm
+          path: ${{ runner.temp }}/arm-original-sdk
+          github-token: ${{ github.token }}
+      - name: Download original owner source distributions
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          repository: passagemath/passagemath
+          run-id: ${{ matrix.source_run }}
+          name: dist-windows
+          path: ${{ runner.temp }}/arm-original-sdists
+          github-token: ${{ github.token }}
+      - name: Prove native identity, replay, rebuild and accept
+        shell: pwsh
+        run: >-
+          python -B -X utf8 tools/windows_arm64_acceptance/run_arm64.py
+          --pr ${{ matrix.pr }}
+          --wheelhouse "${{ runner.temp }}/arm-original-wheels"
+          --sdk "${{ runner.temp }}/arm-original-sdk"
+          --sdists "${{ runner.temp }}/arm-original-sdists"

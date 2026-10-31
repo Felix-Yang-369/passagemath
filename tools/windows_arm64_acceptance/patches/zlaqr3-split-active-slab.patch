@@ -1,0 +1,26 @@
+--- a/lapack-netlib/SRC/zlaqr3.f
++++ b/lapack-netlib/SRC/zlaqr3.f
+@@ -523,11 +523,20 @@
+ *
+ *        ==== Update vertical slab in H ====
+ *
++*        Keep the active slab geometry independent of WANTT.  BLAS
++*        kernels may round identical dot products differently when the
++*        number or position of other rows in the GEMM call changes.
+          IF( WANTT ) THEN
+-            LTOP = 1
+-         ELSE
+-            LTOP = KTOP
++            DO 55 KROW = 1, KTOP - 1, NV
++               KLN = MIN( NV, KTOP-KROW )
++               CALL ZGEMM( 'N', 'N', KLN, JW, JW, ONE,
++     $                     H( KROW, KWTOP ), LDH, V, LDV, ZERO,
++     $                     WV, LDWV )
++               CALL ZLACPY( 'A', KLN, JW, WV, LDWV,
++     $                      H( KROW, KWTOP ), LDH )
++   55       CONTINUE
+          END IF
++         LTOP = KTOP
+          DO 60 KROW = LTOP, KWTOP - 1, NV
+             KLN = MIN( NV, KWTOP-KROW )
+             CALL ZGEMM( 'N', 'N', KLN, JW, JW, ONE, H( KROW, KWTOP ),
