@@ -1,0 +1,50 @@
+--- a/lib/poly.c
++++ b/lib/poly.c
+@@ -72,7 +72,7 @@
+ #define bp_chunksize 10000
+ #define bp_chunkreserve  500
+ #define bp_sprintf(...) {\
+-        sprintf(bp+offs, __VA_ARGS__, &pos);\
++        pos = sprintf(bp+offs, __VA_ARGS__);\
+         offs += pos;\
+         if (offs > maxlen - bp_chunkreserve) {\
+ 	   maxlen += bp_chunksize + bp_chunkreserve;\
+@@ -84,7 +84,7 @@
+   bp = (char *)GC_MALLOC(sizeof(char) * maxlen);
+   if (!p->len)
+   {
+-    bp_sprintf("0%n")
++    bp_sprintf("0")
+     return bp;
+   }
+ 
+@@ -93,20 +93,20 @@
+     if (!pt->coef) continue;
+     m = p_sign(pt->m);
+     l = p_sign(pt->l);
+-    if (pt->coef < ((sb4)0)) bp_sprintf(" - %n")
+-    else if (!first) bp_sprintf(" + %n")
+-    if (pt->coef > ((sb4)1) ) bp_sprintf("%ld%n", pt->coef)
+-    else if (pt->coef < (sb4)(-1)) bp_sprintf("%ld%n", -pt->coef)
+-    else if ((!l) && (!m)) bp_sprintf("%d%n", 1)
++    if (pt->coef < ((sb4)0)) bp_sprintf(" - ")
++    else if (!first) bp_sprintf(" + ")
++    if (pt->coef > ((sb4)1) ) bp_sprintf("%ld", pt->coef)
++    else if (pt->coef < (sb4)(-1)) bp_sprintf("%ld", -pt->coef)
++    else if ((!l) && (!m)) bp_sprintf("%d", 1)
+     if (pt->m)
+     {
+-      bp_sprintf("M%n")
+-      if (m != 1) bp_sprintf("^%ld%n", m)
++      bp_sprintf("M")
++      if (m != 1) bp_sprintf("^%ld", m)
+     }
+     if (pt->l)
+     {
+-      bp_sprintf("L%n")
+-      if (l != 1) bp_sprintf("^%ld%n", l)
++      bp_sprintf("L")
++      if (l != 1) bp_sprintf("^%ld", l)
+     }
+     if (first) first = 0;
+   }

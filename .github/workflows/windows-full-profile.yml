@@ -1,0 +1,125 @@
+name: Complete native Windows modular profile
+
+on:
+  push:
+    branches: [codex/native-full-profile-20261031]
+    paths:
+      - .github/workflows/windows-full-profile.yml
+      - tools/windows_full_profile/**
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  complete-profile:
+    if: github.repository == 'Felix-Yang-369/passagemath' && github.event.repository.private == false
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 360
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - pr: 2973
+            arch: x64
+            os: windows-2022
+            msystem: UCRT64
+            msys_package_prefix: ucrt-x86_64
+            source_run: 39386870328
+            source_merge: 8e3a6ce13905798e29a3f6d9a41186cf5668aec5
+          - pr: 2973
+            arch: arm64
+            os: windows-11-arm
+            msystem: CLANGARM64
+            msys_package_prefix: clang-aarch64
+            source_run: 39386870328
+            source_merge: 8e3a6ce13905798e29a3f6d9a41186cf5668aec5
+          - pr: 2974
+            arch: x64
+            os: windows-2022
+            msystem: UCRT64
+            msys_package_prefix: ucrt-x86_64
+            source_run: 39387023560
+            source_merge: fda37754f91623021e46c59496b6243112da2fc3
+          - pr: 2974
+            arch: arm64
+            os: windows-11-arm
+            msystem: CLANGARM64
+            msys_package_prefix: clang-aarch64
+            source_run: 39387023560
+            source_merge: fda37754f91623021e46c59496b6243112da2fc3
+    steps:
+      - name: Checkout the reviewed public validation payload
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - name: Checkout the exact original public merge for complete tox configs
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: passagemath/passagemath
+          ref: ${{ matrix.source_merge }}
+          path: original-source
+          persist-credentials: false
+          sparse-checkout: |
+            pkgs
+            build/bin/sage-dist-helpers
+          sparse-checkout-cone-mode: false
+      - name: Set up native CPython
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: 3.12.10
+          architecture: ${{ matrix.arch }}
+      - name: Normal MSYS2 runtime providers without Actions caching
+        id: msys
+        uses: msys2/setup-msys2@61f9e5e925871ba6c9e3e8da24ede83ea27fa91f
+        with:
+          msystem: ${{ matrix.msystem }}
+          path-type: inherit
+          cache: false
+          install: >-
+            mingw-w64-${{ matrix.msys_package_prefix }}-gcc
+            mingw-w64-${{ matrix.msys_package_prefix }}-fc
+            mingw-w64-${{ matrix.msys_package_prefix }}-omp
+            mingw-w64-${{ matrix.msys_package_prefix }}-pkgconf
+            autotools python python-pip python-setuptools patch bison
+            mingw-w64-${{ matrix.msys_package_prefix }}-cmake
+            mingw-w64-${{ matrix.msys_package_prefix }}-ninja
+            mingw-w64-${{ matrix.msys_package_prefix }}-gtest
+            mingw-w64-${{ matrix.msys_package_prefix }}-ncurses
+            mingw-w64-${{ matrix.msys_package_prefix }}-readline
+            mingw-w64-${{ matrix.msys_package_prefix }}-texinfo
+      - name: Download the complete original public native SDK
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          repository: passagemath/passagemath
+          run-id: ${{ matrix.source_run }}
+          name: sage-local-${{ matrix.os }}
+          path: ${{ runner.temp }}/full-profile-original-sdk
+          github-token: ${{ github.token }}
+      - name: Download all original public owner source distributions
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          repository: passagemath/passagemath
+          run-id: ${{ matrix.source_run }}
+          name: dist-windows
+          path: ${{ runner.temp }}/full-profile-original-sdists
+          github-token: ${{ github.token }}
+      - name: Download original public pure Python package wheels
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          repository: passagemath/passagemath
+          run-id: ${{ matrix.source_run }}
+          name: noarch-wheels-windows
+          path: ${{ runner.temp }}/full-profile-original-noarch
+          github-token: ${{ github.token }}
+      - name: Build all sixteen normal owners and run all fourteen complete suites
+        shell: pwsh
+        run: >-
+          python -I -B -X utf8 tools/windows_full_profile/run_full_profile.py
+          --pr ${{ matrix.pr }} --arch ${{ matrix.arch }}
+          --sdk "${{ runner.temp }}/full-profile-original-sdk"
+          --sdists "${{ runner.temp }}/full-profile-original-sdists"
+          --noarch "${{ runner.temp }}/full-profile-original-noarch"
+          --checkout "${{ github.workspace }}/original-source"
+          --msys-root "${{ steps.msys.outputs.msys2-location }}"
