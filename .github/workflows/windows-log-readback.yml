@@ -1,0 +1,34 @@
+name: Recover immutable native Windows job logs
+
+on:
+  push:
+    branches: [codex/native-full-profile-20261031]
+    paths:
+      - .github/workflows/windows-log-readback.yml
+      - tools/windows_log_readback/**
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  recover-log:
+    if: github.repository == 'Felix-Yang-369/passagemath' && github.event.repository.private == false
+    runs-on: ubuntu-24.04
+    timeout-minutes: 130
+    strategy:
+      fail-fast: false
+      matrix:
+        source_job_id: [124676602021, 124676602046, 124676601848, 124676602096, 124684126367, 124684126630, 124684126632, 124684126560]
+    steps:
+      - name: Checkout only the reviewed public log transport
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+          sparse-checkout: tools/windows_log_readback
+          sparse-checkout-cone-mode: false
+      - name: Recover one exact completed original job without rerunning it
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: python3 -B tools/windows_log_readback/relay.py --source-job-id ${{ matrix.source_job_id }}
