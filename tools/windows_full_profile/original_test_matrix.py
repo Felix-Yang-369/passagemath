@@ -138,11 +138,14 @@ def execute_original_jobs(*,root,checkout,py,wheelhouse,tools,noarch,contracts,a
             constraints.write_text('\n'.join(lines)+'\n',encoding='utf-8')
             test_env=dict(runtime_env);test_env.pop('PYTHONPATH',None);test_env.pop('PIP_NO_INDEX',None)
             test_env.update({'PIP_INDEX_URL':'https://pypi.org/simple','PIP_FIND_LINKS':str(wheelhouse)+' '+str(tools),'PIP_CONSTRAINT':str(constraints),'PIP_BUILD_CONSTRAINT':str(constraints),'PIP_CONFIG_FILE':os.devnull,'PIP_USER':'0','PYTHONNOUSERSITE':'1','PYTHONDONTWRITEBYTECODE':'1','TOX_USER_CONFIG_FILE':os.devnull,'SAGE_DOCTEST_OPTIONS':'--verbose'})
+            # Keep the original native Windows sentinel through MSYS. HOME
+            # retains normal POSIX-to-Windows conversion for native Python.
+            test_env['MSYS2_ENV_CONV_EXCL']='SAGE_DOC'
             private=root/'private-test-state'/package
             for key,relative in {'APPDATA':'roaming','LOCALAPPDATA':'local','USERPROFILE':'home','JUPYTER_CONFIG_DIR':'jupyter-config','JUPYTER_DATA_DIR':'jupyter-data','JUPYTER_RUNTIME_DIR':'jupyter-runtime','IPYTHONDIR':'ipython','MPLCONFIGDIR':'matplotlib','XDG_CACHE_HOME':'xdg-cache','XDG_CONFIG_HOME':'xdg-config','XDG_DATA_HOME':'xdg-data','PIP_CACHE_DIR':'pip-cache','TEMP':'temp','TMP':'temp'}.items():
                 directory=private/relative;directory.mkdir(parents=True,exist_ok=True);test_env[key]=str(directory)
             drive,tail=os.path.splitdrive(test_env['USERPROFILE']);test_env['HOMEDRIVE']=drive;test_env['HOMEPATH']=tail
-            private_keys=('APPDATA','LOCALAPPDATA','USERPROFILE','HOMEDRIVE','HOMEPATH','JUPYTER_CONFIG_DIR','JUPYTER_DATA_DIR','JUPYTER_RUNTIME_DIR','IPYTHONDIR','MPLCONFIGDIR','XDG_CACHE_HOME','XDG_CONFIG_HOME','XDG_DATA_HOME','PIP_CACHE_DIR','PYTHONNOUSERSITE','PYTHONDONTWRITEBYTECODE','PIP_CONFIG_FILE','PIP_USER','PIP_INDEX_URL','PIP_FIND_LINKS','PIP_CONSTRAINT','PIP_BUILD_CONSTRAINT','SAGE_DOCTEST_OPTIONS','SAGE_LOCAL','PYTHONIOENCODING','PYTHONUTF8','TOX_USER_CONFIG_FILE')
+            private_keys=('APPDATA','LOCALAPPDATA','USERPROFILE','HOMEDRIVE','HOMEPATH','JUPYTER_CONFIG_DIR','JUPYTER_DATA_DIR','JUPYTER_RUNTIME_DIR','IPYTHONDIR','MPLCONFIGDIR','XDG_CACHE_HOME','XDG_CONFIG_HOME','XDG_DATA_HOME','PIP_CACHE_DIR','PYTHONNOUSERSITE','PYTHONDONTWRITEBYTECODE','PIP_CONFIG_FILE','PIP_USER','PIP_INDEX_URL','PIP_FIND_LINKS','PIP_CONSTRAINT','PIP_BUILD_CONSTRAINT','SAGE_DOCTEST_OPTIONS','SAGE_LOCAL','PYTHONIOENCODING','PYTHONUTF8','TOX_USER_CONFIG_FILE','MSYS2_ENV_CONV_EXCL')
             pass_override='testenv.pass_env+='+'\n'.join(private_keys)
             state_override='testenv.set_env+=DOT_SAGE={envdir}/.sage'
             work=root/'tox-work'/package
@@ -193,7 +196,12 @@ def execute_original_jobs(*,root,checkout,py,wheelhouse,tools,noarch,contracts,a
                     if row['kind']=='mathematics':
                         bash_path=root/(label+'-BASH_PRE_PROVENANCE.json')
                         bash='set -e; cp=$1; shift; p=$(command -v python); r=$(command -v sage-runtests); export PROFILE_BASH_PYTHON="$("$cp" -w "$p")" PROFILE_BASH_SAGE_RUNTESTS="$("$cp" -w "$r")"; exec python -I -B "$@"'
-                        run(label+'-original-bash-launcher',[*common,'exec','-e',name,'--','bash','-c',bash,'original-bash-resolution',cygpath,here/'child_inventory.py','--require-bash-resolution',*arguments,'--output',bash_path],test_env,cwd,timeout=600)
+                        # list2cmdline must quote the whole JSON argument:
+                        # MSYS misparses an unquoted no-space ["test"] value.
+                        bash_arguments=list(arguments);position=bash_arguments.index('--requested-extras-json')+1
+                        value=bash_arguments[position];bash_arguments[position]='[ '+value[1:-1]+' ]'
+                        assert json.loads(bash_arguments[position])==row['requested_extras']
+                        run(label+'-original-bash-launcher',[*common,'exec','-e',name,'--','bash','-c',bash,'original-bash-resolution',cygpath,here/'child_inventory.py','--require-bash-resolution',*bash_arguments,'--output',bash_path],test_env,cwd,timeout=600)
                         bash_proof=read_json(bash_path)
                         if bash_proof.get('original_bash_resolution',{}).get('passed') is not True or bash_proof['installed_distribution_source_lock_sha256']!=pre['installed_distribution_source_lock_sha256']:raise ValueError('Original Bash/native launcher identity differs')
                         row['original_bash_native_launcher_proven']=True
