@@ -6,7 +6,7 @@ import re
 import shutil
 
 from profile_contract import (OWNERS,TEST_OWNERS,ORIGINAL_EIGHT,compare_units,
-    original_environment_targets,resolved_original_tox_matrix,sha)
+    original_environment_targets,resolved_original_tox_matrix,select_original_tox_journal,sha)
 
 
 def unique_object(pairs):
@@ -23,6 +23,7 @@ def read_json(path):return json.loads(Path(path).read_text(encoding='utf-8'),obj
 def clean_receipt(entry):
     return (type(entry.get('exit')) is int and type(entry.get('actual_returncode')) is int
             and entry['exit']==entry['actual_returncode']==0
+            and entry.get('running') is False
             and entry.get('remaining_pids')==[] and entry.get('timed_out') is False
             and not entry.get('error') and not entry.get('remaining_query_error')
             and entry.get('job_assignment')=='assigned')
@@ -67,16 +68,25 @@ def allowed_dependency_diagnostic(package,bootstrap,failed_environments):
     """Only original declared external-dependency failures can run unverified."""
     if (type(bootstrap.get('exit')) is not int or type(bootstrap.get('actual_returncode')) is not int
             or bootstrap['exit']!=bootstrap['actual_returncode'] or bootstrap['exit']!=1
+            or bootstrap.get('running') is not False
             or bootstrap.get('timed_out') is not False or bootstrap.get('remaining_pids')!=[]
             or bootstrap.get('job_assignment')!='assigned'
             or bootstrap.get('error') or bootstrap.get('remaining_query_error')):return False
     if package not in ('cddlib','highs','graphs'):return False
     if package=='graphs' and set(failed_environments)!={'py312-norequirements-modules-pari'}:return False
+    if package in ('cddlib','highs') and set(failed_environments)!={'py312-norequirements'}:return False
     text='\n'.join(Path(bootstrap[stream]['path']).read_bytes().decode('utf-8',errors='replace') for stream in ('stdout','stderr'))
-    if re.search(r'THESE PACKAGES DO NOT MATCH THE HASHES|\b(?:sha256|hash|digest)\b[^\n]*(?:mismatch|differ)|(?:wrong|mismatched)[^\n]*(?:architecture|machine|PE)|\bintegrity\b|source[^\n]*(?:changed|mismatch)|not a supported wheel|CERTIFICATE_VERIFY_FAILED|ProxyError|ReadTimeout|Temporary failure in name resolution',text,re.I):return False
+    if re.search(r'THESE PACKAGES DO NOT MATCH THE HASHES|\b(?:sha256|hash|digest)\b[^\n]*(?:mismatch|differ)|(?:wrong|mismatched)[^\n]*(?:architecture|machine|PE)|\bLNK1112\b|machine type[^\n]*conflicts with target machine type|\bintegrity\b|source[^\n]*(?:changed|mismatch)|not a supported wheel|CERTIFICATE_VERIFY_FAILED|ProxyError|ReadTimeout|Temporary failure in name resolution|NewConnectionError|Failed to establish a new connection',text,re.I):return False
     missing=r'(?:No matching distribution found for|Could not find a version that satisfies the requirement)\s+passagemath-'
     if package=='graphs':
         return bool(re.search(missing+r'pari\b|cannot find an installation of PARI/GP',text,re.I))
+    if package=='cddlib' and all(re.search(pattern,text,re.I) for pattern in (
+            # The actual localized pip/MSVC stream has already mojibaked the
+            # opening quote plus N into the exact UTF-8 witness U+6DE3 (淣).
+            r'fatal error C1083[^\n]*(?:NTL|淣TL)[/\\]ZZ\.h[^\n]*No such file or directory',
+            r'Failed building wheel for passagemath-ntl\b',
+            r"Failed to build ['\"]passagemath-flint['\"] when installing build dependencies for passagemath-flint\b")):
+        return True
     return bool(re.search(missing+r'(?:polyhedra|ppl)\b|fatal error[^\n]*ppl\.hh[^\n]*No such file or directory',text,re.I))
 
 
@@ -156,8 +166,9 @@ def execute_original_jobs(*,root,checkout,py,wheelhouse,tools,noarch,contracts,a
             bootstrap_path=root/(package+'-BOOTSTRAP_TOX_REPORT.json')
             bootstrap=run(package+'-normal-all-environment-bootstrap',[*base,'--notest','--result-json',bootstrap_path],setup_env,cwd,timeout=1800,strict=False)
             record['normal_bootstrap_receipt']=bootstrap
-            bootstrap_envs=read_json(bootstrap_path).get('testenvs',{}) if bootstrap_path.is_file() else {}
-            if set(bootstrap_envs)!=set(envs):raise ValueError('Normal bootstrap did not report every original environment')
+            bootstrap_journal=select_original_tox_journal(read_json(bootstrap_path),body,envs,work)
+            save(root/(package+'-BOOTSTRAP_JOURNAL_CLASSIFICATION.json'),bootstrap_journal['classification'])
+            bootstrap_envs=bootstrap_journal['selected']
             failed=[];hard_failure=False
             pip_version=next(x.split('==',1)[1] for x in pins['third_party_build_pins'] if x.startswith('pip=='))
             pip_wheel=next(tools.glob('pip-'+pip_version+'-*.whl'))
@@ -202,8 +213,9 @@ def execute_original_jobs(*,root,checkout,py,wheelhouse,tools,noarch,contracts,a
             # Store actual RC before all subsequent JSON/source/stat readback.
             record.update({'state':'executed','exit':literal['exit'],'actual_tox_receipt':literal})
             save(root/(package+'-ACTUAL_EXECUTION_RECEIPT.json'),{'package':package,'exit':literal['exit'],'receipt':literal,'unverified_environments':failed})
-            actual_envs=read_json(report_path).get('testenvs',{}) if report_path.is_file() else {}
-            if set(actual_envs)!=set(envs):raise ValueError('Actual full tox result omits/adds original environments')
+            actual_journal=select_original_tox_journal(read_json(report_path),body,envs,work)
+            save(root/(package+'-ACTUAL_JOURNAL_CLASSIFICATION.json'),actual_journal['classification'])
+            actual_envs=actual_journal['selected']
             actual_results=[]
             for row in env_rows:
                 actual=actual_envs[row['name']];result=actual.get('result',{})

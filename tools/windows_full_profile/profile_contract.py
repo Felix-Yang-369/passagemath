@@ -219,6 +219,83 @@ def original_source_tox_environments(body):
     if len(mapped)!=len(set(mapped)):raise ValueError('Original sed conversion collides')
     return [{'original':a,'name':b} for a,b in zip(source,mapped)]
 
+def select_original_tox_journal(journal,body,selected_names,work):
+    """Retain selected results and classify normal tox's unexecuted journals.
+
+    Exact primary witnesses: both GLPK --notest and complete --result-json.
+    Source-defined inactive aliases and packaging metadata may be lazy {} rows.
+    Only the observed external-wheel packaging freeze is a nonempty extra row.
+    """
+    import configparser
+    import math
+    config=configparser.ConfigParser(interpolation=None,strict=True);config.read_string(body)
+    source=original_source_tox_environments(body)
+    expected=[row['name'] for row in source]
+    if list(selected_names)!=expected:raise ValueError('Journal selected scope differs from literal original source')
+    names={row['original'] for row in source}
+    for section in config.sections():
+        if section.startswith('testenv:'):
+            name=section[len('testenv:'):]
+            if not re.fullmatch(r'[A-Za-z0-9_.-]+',name):raise ValueError('Nonliteral original source testenv name')
+            names.add(name)
+    lazy=set(names)|{'.pkg_external_sdist_meta'}
+    # Normal graphs journal also creates a lazy bare polyhedra factor. Derive
+    # these names from literal original extras/setenv selectors, never a prefix.
+    for section in ('testenv','pkgenv'):
+        if not config.has_section(section):continue
+        for key in ('extras','setenv','set_env'):
+            for line in config.get(section,key,fallback='').splitlines():
+                line=line.split('#',1)[0].strip()
+                if ':' not in line:continue
+                condition=line.split(':',1)[0].strip()
+                if re.fullmatch(r'!?[a-z0-9_]+(?:-!?[a-z0-9_]+)*(?:\s*,\s*!?[a-z0-9_]+(?:-!?[a-z0-9_]+)*)*',condition):
+                    lazy.update(term.lstrip('!').strip() for alternative in condition.split(',') for term in alternative.strip().split('-'))
+    for name in names:
+        if name.startswith('.pkg-'):lazy.add(name+'_sdist_meta')
+        elif name.startswith('sagepython'):
+            lazy.update(('.pkg-'+name,'.pkg-'+name+'_sdist_meta'))
+    if not isinstance(journal,dict) or journal.get('reportversion')!='1':raise ValueError('Unsupported actual tox journal schema')
+    actual=journal.get('testenvs')
+    if not isinstance(actual,dict) or not set(expected)<=set(actual):raise ValueError('Actual journal omits a selected original environment')
+    selected={};classified=[]
+    for name,row in actual.items():
+        if not isinstance(row,dict):raise ValueError('Actual journal environment is not an object')
+        if name in expected:
+            result=row.get('result')
+            if (not isinstance(result,dict) or type(result.get('success')) is not bool
+                    or type(result.get('exit_code')) is not int or type(result.get('skipped')) is not bool
+                    or type(result.get('duration')) not in (int,float)
+                    or not math.isfinite(result['duration']) or result['duration']<0):
+                raise ValueError('Selected original environment lacks a real typed result '+name)
+            selected[name]=row;classified.append({'name':name,'classification':'selected_original_environment','actual_result':result})
+        elif row=={} and name in lazy:
+            classified.append({'name':name,'classification':'source_defined_inactive_empty_journal'})
+        elif name=='.pkg_external':
+            if set(row)!={'python','installed_packages','setup'}:raise ValueError('External packaging journal has unknown/test/result fields')
+            python=row['python'];packages=row['installed_packages'];setup=row['setup']
+            python_keys={'implementation','version_info','version','is_64','sysplatform','extra_version_info','free_threaded','debug','machine','executable'}
+            if (not isinstance(python,dict) or set(python)!=python_keys
+                    or python['implementation']!='CPython' or python['version_info']!=[3,12,10,'final',0]
+                    or python['is_64'] is not True or python['sysplatform']!='win32'
+                    or python['extra_version_info'] is not None or python['free_threaded'] is not False or python['debug'] is not False
+                    or not all(isinstance(python[k],str) and python[k] for k in ('version','machine','executable'))
+                    or not isinstance(packages,list) or not all(isinstance(p,str) for p in packages)
+                    or not isinstance(setup,list) or len(setup)!=1):raise ValueError('Invalid observed external packaging schema')
+            command=setup[0]
+            if not isinstance(command,dict):raise ValueError('External packaging command is not an object')
+            argv=command.get('command')
+            wanted=Path(work)/'.pkg_external/Scripts/python.exe'
+            if (not isinstance(argv,list) or len(argv)!=5 or not all(isinstance(x,str) for x in argv)
+                    or Path(argv[0]).resolve()!=wanted.resolve() or argv[1:]!=['-m','pip','freeze','--all']
+                    or command.get('run_id')!='freeze' or type(command.get('retcode')) is not int
+                    or command['retcode']!=0):raise ValueError('External packaging executes an unobserved command')
+            classified.append({'name':name,'classification':'observed_normal_external_wheel_packaging_freeze','command':argv,'retcode':command['retcode']})
+        else:raise ValueError('Unknown or actually executed extra tox journal '+name)
+    return {'selected':{name:selected[name] for name in expected},'classification':{
+        'passed':True,'selected_environment_names':expected,'all_raw_environment_names':list(actual),
+        'source_defined_lazy_names':sorted(lazy),'rows':classified,'no_extra_test_environment_execution':True}}
+
+
 def source_requested_extras(body,original_environment):
     """Resolve the simple factor expressions actually used by these source files."""
     import configparser

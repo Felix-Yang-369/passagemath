@@ -187,15 +187,33 @@ def main():
         if native_host.is_dir():selected['PATH']=str(native_host)+';'+selected['PATH']
         cl=shutil.which('cl.exe',path=selected['PATH']);lib=shutil.which('lib.exe',path=selected['PATH']);dumpbin=shutil.which('dumpbin.exe',path=selected['PATH'])
         if not cl or 'Microsoft Visual Studio' not in cl or not lib:raise ValueError('Actual MSVC compiler not selected')
-        msystem='ucrt64' if args.arch=='x64' else 'clangarm64';msysbin=args.msys_root/msystem/'bin'
+        msystem='ucrt64' if args.arch=='x64' else 'clangarm64';msysbin=args.msys_root/msystem/'bin';msysusr=args.msys_root/'usr/bin'
         pkg_config=msysbin/'pkg-config.exe'
         if not pkg_config.is_file():raise ValueError('Normal native MSYS2 pkgconf missing')
         for directory in ('temp','home','dot-sage'): (root/directory).mkdir()
         env.update({'CIBUILDWHEEL':'1','SAGE_LOCAL':str(sdk),'SAGE_VENV':str(root/'build-env'),'SAGE_NUM_THREADS':'4','SAGE_DEBUG':'no','PYTHONDONTWRITEBYTECODE':'1','PYTHONNOUSERSITE':'1','PYTHONUTF8':'1','PYTHONIOENCODING':'utf-8','PIP_DISABLE_PIP_VERSION_CHECK':'1','PIP_NO_CACHE_DIR':'1','PIP_CONFIG_FILE':os.devnull,'DOT_SAGE':str(root/'dot-sage'),'HOME':str(root/'home'),'TEMP':str(root/'temp'),'TMP':str(root/'temp'),'PKG_CONFIG':str(pkg_config),'PKG_CONFIG_PATH':str(sdk/'lib/pkgconfig'),'SAGE_PKG_CONFIG_PATH':str(sdk/'lib/pkgconfig')})
-        env['PATH']=';'.join((str(Path(cl).parent),str(sdk/'bin'),str(root/'build-env/Scripts'),str(msysbin),selected['PATH']))
+        env['PATH']=';'.join((str(Path(cl).parent),str(msysusr),str(sdk/'bin'),str(root/'build-env/Scripts'),str(msysbin),selected['PATH']))
         env['INCLUDE']=str(sdk/'include')+';'+selected['INCLUDE'];env['LIB']=str(sdk/'bin')+';'+str(sdk/'lib')+';'+selected['LIB']
+        env['CPATH']=str(sdk/'include');env['LIBRARY_PATH']=str(sdk/'lib')
         runtime_env=dict(env)
-        runtime_env['PATH']=';'.join((str(sdk/'bin'),str(root/'build-env/Scripts'),str(msysbin),selected['PATH']))
+        runtime_env['PATH']=';'.join((str(sdk/'bin'),str(root/'build-env/Scripts'),str(msysusr),str(msysbin),selected['PATH']))
+        auxiliary_resolution=[]
+        for label,actual_env in (('build',env),('runtime',runtime_env)):
+            command='set -e; for tool in bash find awk sed cat cygpath; do p=$(command -v "$tool"); printf "%s\\t%s\\n" "$tool" "$(cygpath -w "$p")"; done'
+            entry=run(label+'-actual-consistent-msys2-tools',[msysusr/'bash.exe','-c',command],actual_env)
+            actual={}
+            for line in Path(entry['stdout']['path']).read_text(encoding='utf-8').splitlines():
+                name,value=line.split('\t',1)
+                if name in actual:raise ValueError('Duplicate auxiliary command resolution')
+                path=Path(value)
+                if not path.is_file() and not path.suffix:path=Path(str(path)+'.exe')
+                resolved=path.resolve()
+                native=shutil.which(name+'.exe',path=actual_env['PATH'])
+                if resolved.parent!=msysusr.resolve() or native is None or Path(native).resolve()!=resolved:raise ValueError('Mixed inherited auxiliary tool selected '+name)
+                actual[name]=pe_record(resolved,'Actual '+label+' Bash/PATH MSYS2 '+name)
+            if set(actual)!={'bash','find','awk','sed','cat','cygpath'}:raise ValueError('Incomplete actual MSYS2 command resolution')
+            auxiliary_resolution.append({'environment':label,'passed':True,'PATH':actual_env['PATH'],'tools':actual,'receipt':file_record(Path(entry['stdout']['path']).parent/'receipt.json')})
+        save(root/'ACTUAL_MSYS2_AUXILIARY_RESOLUTION.json',{'passed':True,'environments':auxiliary_resolution,'scope':'Consistent same-distribution auxiliary tools; candidate/native Python architecture contract is unchanged'})
         auxiliary=[pe_record(path,role) for path,role in ((args.msys_root/'usr/bin/bash.exe','original tox/helper auxiliary MSYS2 shell'),(args.msys_root/'usr/bin/cygpath.exe','path conversion auxiliary'),(Path(shutil.which('git.exe')),'source/patch auxiliary Git'))]
         toolchain={'compiler':pe_record(cl,'native target compiler'),'librarian':pe_record(lib,'native import library producer'),'dumpbin':pe_record(dumpbin,'export reader'),'pkg_config':pe_record(pkg_config,'normal MSYS2 pkgconf metadata tool'),'auxiliary_tools':auxiliary,'preferred_native_host_tool_dir':str(native_host),'preferred_native_host_available':native_host.is_dir(),'msvc_target':target,'msys_arch_bin':str(msysbin),'normal_setuptools_msvc_initialization':True,'DISTUTILS_USE_SDK_override':False,'python_pkgconf_wheel_used':False,'auxiliary_tools_may_use_host_emulation':True,'native_math_scope':'CPython and all candidate .pyd/producer DLL files must match target; auxiliary executable PE is reported separately.'}
         if native_host.is_dir() and any(toolchain[key]['pe_machine']!=identity['native_machine'] for key in ('compiler','librarian','dumpbin')):raise ValueError('Preferred native MSVC host tool PE mismatch')
@@ -228,7 +246,7 @@ def main():
             provider_wheels.append(dict(file_record(wheel),internal_tags=tags,official_primary_file=primary))
         save(root/'THIRD_PARTY_PROVIDER_WHEELS.json',provider_wheels)
         run('install-pinned-build-tools',[py,'-I','-B','-m','pip','install','--no-index','--no-deps','--find-links',tools,*sorted(tools.glob('*.whl'))],env,timeout=900)
-        run('download-memory-allocator-source',[py,'-I','-B','-m','pip','download','--no-deps','--no-binary=:all:','--dest',tools,pins['source_build_requirement']],env,timeout=600)
+        run('download-memory-allocator-source',[py,'-I','-B','-m','pip','download','--no-deps','--no-build-isolation','--no-binary=:all:','--dest',tools,pins['source_build_requirement']],env,timeout=600)
         memory=next(tools.glob('memory_allocator-*.tar.gz'))
         if memory.name not in primary_files or sha(memory)!=primary_files[memory.name]['sha256']:raise ValueError('Memory allocator source differs from official pinned metadata')
         save(root/'MEMORY_ALLOCATOR_SOURCE.json',dict(file_record(memory),official_primary_file=primary_files[memory.name]))
