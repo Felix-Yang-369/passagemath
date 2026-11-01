@@ -410,11 +410,9 @@ def compare_units(expected,stats,baseline):
     for name in names:
         item=stats.get(name,{});n=item.get('ntests');wall=item.get('walltime');failed=item.get('failed',False)
         valid_n=type(n) is int and n>=0
-        valid_wall=type(wall) in (int,float) and math.isfinite(wall) and 0<wall<1e6
-        # Sage reports exact zero elapsed time for selected files with no tests.
-        # Retain those units; a mathematical phase still needs positive total.
-        valid_wall=valid_wall or (type(n) is int and n==0 and failed is False
-            and type(wall) in (int,float) and math.isfinite(wall) and wall==0)
+        # The original Sage Timer uses time.time differences, which may be
+        # exactly zero even for a successfully executed short doctest unit.
+        valid_wall=type(wall) in (int,float) and math.isfinite(wall) and 0<=wall<1e6
         known=baseline.get(name,{}).get('failed') is True
         valid_fail=type(failed) is bool and (failed is False or known)
         if valid_n:total+=n

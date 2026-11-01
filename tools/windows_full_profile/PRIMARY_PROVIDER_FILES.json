@@ -257,21 +257,21 @@
       "metadata_url": "https://pypi.org/pypi/MarkupSafe/3.0.4/json",
       "metadata_sha256": "85cd5bce3f85e67ab0b921be9c9ba144a7cc01a2d02b85ad65b1f8dabeac4c57"
     },
-    "tox-4.67.4-py3-none-any.whl": {
-      "filename": "tox-4.67.4-py3-none-any.whl",
-      "sha256": "e1be08d3dbeb44c7a87ec6b4f0be840b0a0db375013c3c801e5bb428c5607361",
-      "bytes": 239419,
-      "url": "https://files.pythonhosted.org/packages/27/0e/1a4927a8b5b6bc34a6dec3020094daca52605f2050ecd921cfe36a37c480/tox-4.67.4-py3-none-any.whl",
-      "metadata_url": "https://pypi.org/pypi/tox/4.67.4/json",
-      "metadata_sha256": "410d3e22f0e78fa3f116575e0d00492eb5da72693ad25f8be8822526d37147b4"
+    "tox-4.67.5-py3-none-any.whl": {
+      "filename": "tox-4.67.5-py3-none-any.whl",
+      "sha256": "2ce2844114ff4c50024d9bbdea19a2f3cabe66736d8cf6a3398ad9a3b3ce60fd",
+      "bytes": 259515,
+      "url": "https://files.pythonhosted.org/packages/35/ee/331b99edc9a23c4b9af08f8a0f4d6925e78255fac9a3398e46b1af6a05fd/tox-4.67.5-py3-none-any.whl",
+      "metadata_url": "https://pypi.org/pypi/tox/4.67.5/json",
+      "metadata_sha256": "66babb8b971331d3b271677eaafd19b59f866a54448f830f85bf780c33d48fd8"
     },
-    "tox-4.67.4.tar.gz": {
-      "filename": "tox-4.67.4.tar.gz",
-      "sha256": "6f97945d3ca1c204337aeecd858b178b30fc5cf9d0b0c15aacea12d1c5eb0946",
-      "bytes": 351271,
-      "url": "https://files.pythonhosted.org/packages/64/bf/c0eb714b28d21c225eec423efc4243d806de64b5678fec6a15e03a361c09/tox-4.67.4.tar.gz",
-      "metadata_url": "https://pypi.org/pypi/tox/4.67.4/json",
-      "metadata_sha256": "410d3e22f0e78fa3f116575e0d00492eb5da72693ad25f8be8822526d37147b4"
+    "tox-4.67.5.tar.gz": {
+      "filename": "tox-4.67.5.tar.gz",
+      "sha256": "f1872e30d89c8d18cbdf3b93c4c7dc04d4f3928c0af413e9ae5b71ba3f1c438d",
+      "bytes": 416551,
+      "url": "https://files.pythonhosted.org/packages/33/d4/58a31918cbae4aea4a3c0f320fe94e616f0c0ca53c0d2fc87b578a8e1dc7/tox-4.67.5.tar.gz",
+      "metadata_url": "https://pypi.org/pypi/tox/4.67.5/json",
+      "metadata_sha256": "66babb8b971331d3b271677eaafd19b59f866a54448f830f85bf780c33d48fd8"
     },
     "memory_allocator-0.1.4.tar.gz": {
       "filename": "memory_allocator-0.1.4.tar.gz",

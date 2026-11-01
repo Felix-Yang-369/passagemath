@@ -81,7 +81,7 @@ def main():
     print('NATIVE_IDENTITY_JSON '+json.dumps(identity),flush=True)
     if sha(HERE/'owned_process.py')!=pins['owned_process_sha256']:raise ValueError('Owned-process helper hash mismatch')
     from owned_process import run_tree
-    receipts=[];builds=[];tests=[];wheel_manifests=[];owner_sources={};source_pins={};fixture_before=None;providers=None;sdk=None;helper_original=None;helper_candidate=None;native_source_ledger=None;candidate_sdk_pins=None;setup_source=None;setup_snapshot=None
+    receipts=[];builds=[];tests=[];wheel_manifests=[];owner_sources={};source_pins={};fixture_before=None;providers=None;sdk=None;helper_original=None;helper_candidate=None;native_source_ledger=None;candidate_sdk_pins=None;setup_source=None;setup_snapshot=None;os_declaration=None;os_declaration_pin=None
 
     def run(name,command,env=None,cwd=root,timeout=1800,strict=True):
         outdir=logs/name;outdir.mkdir()
@@ -133,6 +133,10 @@ def main():
                     changed=[r['path'] for r in values if not Path(r['path']).is_file() or sha(r['path'])!=r['sha256']]
                     return {'passed':not changed,'file_count':len(values),'changed':changed}
                 attempt('declared-native-'+family,native_family)
+        if os_declaration is not None:
+            from os_provider_contract import close_declaration
+            attempt('same-run-OS-declaration-bytes',lambda:{'passed':file_record(root/'ATTESTED_WINDOWS_OS_PROVIDERS.json')==os_declaration_pin})
+            attempt('same-run-signed-Windows-OS-components',lambda:close_declaration(os_declaration,int(identity['native_machine'],16),root,'global-closing'))
         if helper_original is not None:attempt('original-source-helper',lambda:{'passed':sha(args.checkout/'build/bin/sage-dist-helpers')==helper_original})
         value={'passed':all(r['passed'] for r in rows),'independent_closing_attempts':rows};save(root/'CLOSING.json',value);print('CLOSING_JSON '+json.dumps(value),flush=True)
         return value
@@ -140,6 +144,9 @@ def main():
     result=None
 
     try:
+        from os_provider_contract import create_declaration
+        os_declaration=create_declaration(root,int(identity['native_machine'],16),{'run_id':os.environ.get('GITHUB_RUN_ID','local'),'run_attempt':os.environ.get('GITHUB_RUN_ATTEMPT','1'),'job':os.environ.get('GITHUB_JOB','local-normal-profile'),'arch':args.arch})
+        os_declaration_pin=file_record(root/'ATTESTED_WINDOWS_OS_PROVIDERS.json')
         verified={}
         for label,path in (('sdk',args.sdk),('sdist',args.sdists),('noarch',args.noarch)):
             verified[label]=verify_members(path,decoded_members(lane[label+'_artifact']['members']))
@@ -193,7 +200,7 @@ def main():
         for directory in ('temp','home','dot-sage'): (root/directory).mkdir()
         env.update({'CIBUILDWHEEL':'1','SAGE_LOCAL':str(sdk),'SAGE_VENV':str(root/'build-env'),'SAGE_NUM_THREADS':'4','SAGE_DEBUG':'no','PYTHONDONTWRITEBYTECODE':'1','PYTHONNOUSERSITE':'1','PYTHONUTF8':'1','PYTHONIOENCODING':'utf-8','PIP_DISABLE_PIP_VERSION_CHECK':'1','PIP_NO_CACHE_DIR':'1','PIP_CONFIG_FILE':os.devnull,'DOT_SAGE':str(root/'dot-sage'),'HOME':str(root/'home'),'TEMP':str(root/'temp'),'TMP':str(root/'temp'),'PKG_CONFIG':str(pkg_config),'PKG_CONFIG_PATH':str(sdk/'lib/pkgconfig'),'SAGE_PKG_CONFIG_PATH':str(sdk/'lib/pkgconfig')})
         env['PATH']=';'.join((str(Path(cl).parent),str(msysusr),str(sdk/'bin'),str(root/'build-env/Scripts'),str(msysbin),selected['PATH']))
-        env['INCLUDE']=str(sdk/'include')+';'+selected['INCLUDE'];env['LIB']=str(sdk/'bin')+';'+str(sdk/'lib')+';'+selected['LIB']
+        env['INCLUDE']=';'.join((str(sdk/'include'),str(sdk/'include/highs'),selected['INCLUDE']));env['LIB']=str(sdk/'bin')+';'+str(sdk/'lib')+';'+selected['LIB']
         env['CPATH']=str(sdk/'include');env['LIBRARY_PATH']=str(sdk/'lib')
         runtime_env=dict(env)
         runtime_env['PATH']=';'.join((str(sdk/'bin'),str(root/'build-env/Scripts'),str(msysusr),str(msysbin),selected['PATH']))
@@ -401,7 +408,8 @@ def main():
         for family,folder in (('SDK',sdk),('MSYS2',msysbin),('base-Python',Path(sys.base_prefix))):
             for path in folder.rglob('*'):
                 if path.is_file() and path.suffix.lower() in ('.dll','.pyd','.exe'):native_files.append(dict(file_record(path.resolve()),family=family))
-        providers={'sdk_root':str(sdk),'msys_arch_bin':str(msysbin),'base_python':sys.base_prefix,'native_files':native_files}
+        providers={'sdk_root':str(sdk),'msys_arch_bin':str(msysbin),'base_python':sys.base_prefix,'native_files':native_files,
+            'attested_windows_defender_components':os_declaration,'attested_windows_defender_declaration_file':os_declaration_pin}
         provider_path=root/'DECLARED_NATIVE_PROVIDERS.json';save(provider_path,providers)
         wheel_manifests_path=root/'REBUILT_WHEEL_MANIFESTS.json';save(wheel_manifests_path,wheel_manifests)
         accepted={r['package'] for r in builds if r.get('accepted') is True}

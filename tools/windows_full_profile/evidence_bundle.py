@@ -27,6 +27,10 @@ def bundle_bytes(files):
 def emit(root):
     root=Path(root)
     paths=set(root.glob('*.json'))|set(root.glob('logs/*/*.bin'))|set(root.glob('logs/*/receipt.json'))|set(root.glob('evidence-stats/*.json'))
+    # Explicit OS-attestation evidence contains fixed PowerShell source, native
+    # signature receipts and raw text stdout/stderr, including failed probes.
+    for pattern in ('os-attestation/**/*.json','os-attestation/**/*.bin','os-attestation/**/*.ps1'):
+        paths.update(root.glob(pattern))
     files={str(p.relative_to(root)).replace('\\','/'):p.read_bytes() for p in paths if p.is_file()}
     if not files:raise ValueError('No text evidence to preserve')
     # Only explicit text-evidence locations are selected. Wheels, SDKs, native

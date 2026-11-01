@@ -145,7 +145,7 @@ def execute_original_jobs(*,root,checkout,py,wheelhouse,tools,noarch,contracts,a
             for key,relative in {'APPDATA':'roaming','LOCALAPPDATA':'local','USERPROFILE':'home','JUPYTER_CONFIG_DIR':'jupyter-config','JUPYTER_DATA_DIR':'jupyter-data','JUPYTER_RUNTIME_DIR':'jupyter-runtime','IPYTHONDIR':'ipython','MPLCONFIGDIR':'matplotlib','XDG_CACHE_HOME':'xdg-cache','XDG_CONFIG_HOME':'xdg-config','XDG_DATA_HOME':'xdg-data','PIP_CACHE_DIR':'pip-cache','TEMP':'temp','TMP':'temp'}.items():
                 directory=private/relative;directory.mkdir(parents=True,exist_ok=True);test_env[key]=str(directory)
             drive,tail=os.path.splitdrive(test_env['USERPROFILE']);test_env['HOMEDRIVE']=drive;test_env['HOMEPATH']=tail
-            private_keys=('APPDATA','LOCALAPPDATA','USERPROFILE','HOMEDRIVE','HOMEPATH','JUPYTER_CONFIG_DIR','JUPYTER_DATA_DIR','JUPYTER_RUNTIME_DIR','IPYTHONDIR','MPLCONFIGDIR','XDG_CACHE_HOME','XDG_CONFIG_HOME','XDG_DATA_HOME','PIP_CACHE_DIR','PYTHONNOUSERSITE','PYTHONDONTWRITEBYTECODE','PIP_CONFIG_FILE','PIP_USER','PIP_INDEX_URL','PIP_FIND_LINKS','PIP_CONSTRAINT','PIP_BUILD_CONSTRAINT','SAGE_DOCTEST_OPTIONS','SAGE_LOCAL','PYTHONIOENCODING','PYTHONUTF8','TOX_USER_CONFIG_FILE','MSYS2_ENV_CONV_EXCL')
+            private_keys=('APPDATA','LOCALAPPDATA','USERPROFILE','HOMEDRIVE','HOMEPATH','JUPYTER_CONFIG_DIR','JUPYTER_DATA_DIR','JUPYTER_RUNTIME_DIR','IPYTHONDIR','MPLCONFIGDIR','XDG_CACHE_HOME','XDG_CONFIG_HOME','XDG_DATA_HOME','PIP_CACHE_DIR','PYTHONNOUSERSITE','PYTHONDONTWRITEBYTECODE','PIP_CONFIG_FILE','PIP_USER','PIP_INDEX_URL','PIP_FIND_LINKS','PIP_CONSTRAINT','PIP_BUILD_CONSTRAINT','SAGE_DOCTEST_OPTIONS','SAGE_LOCAL','PYTHONIOENCODING','PYTHONUTF8','TOX_USER_CONFIG_FILE','MSYS2_ENV_CONV_EXCL','INCLUDE','LIB')
             pass_override='testenv.pass_env+='+'\n'.join(private_keys)
             state_override='testenv.set_env+=DOT_SAGE={envdir}/.sage'
             work=root/'tox-work'/package
@@ -273,6 +273,15 @@ def execute_original_jobs(*,root,checkout,py,wheelhouse,tools,noarch,contracts,a
                 try:record['fixtures_closing']=fixture_closing(cwd,before,contract['source_sha256'])
                 except Exception as error:record['fixtures_closing']={'passed':False,'error':str(error)}
             else:record['fixtures_closing']={'passed':False,'error':'Original fixture inventory unavailable'}
+            try:
+                from os_provider_contract import close_declaration
+                provider=read_json(provider_path);os_decl=provider['attested_windows_defender_components']
+                expected=provider['attested_windows_defender_declaration_file']
+                if file_record(root/'ATTESTED_WINDOWS_OS_PROVIDERS.json')!=expected:raise ValueError('Same-run OS declaration file changed')
+                record['attested_windows_OS_closing']=close_declaration(os_decl,int(identity['native_machine'],16),root,'owner-closing-'+package)
+            except Exception as error:record['attested_windows_OS_closing']={'passed':False,'error':str(error),'error_type':type(error).__name__}
+            if record['attested_windows_OS_closing']['passed'] is not True:
+                for row in env_rows:row['accepted']=False
             record['provenance_passed']=all(row.get('pre_provenance_passed') is True and row.get('post_provenance_passed') is True for row in env_rows)
             record['units_matched']=all(row.get('accepted') is True for row in env_rows)
             mathematical=[row for row in env_rows if row['kind']=='mathematics']
@@ -281,7 +290,7 @@ def execute_original_jobs(*,root,checkout,py,wheelhouse,tools,noarch,contracts,a
             record['all_original_environments_have_actual_results']=all(row.get('state')=='executed' and type(row.get('exit')) is int for row in env_rows)
             record['complete_original_environment_scope']=matrix is not None and [row['name'] for row in env_rows]==record['original_environment_names']
             record['both_original_import_envs_provenance']=package=='glpk' and len(env_rows)==2 and record['provenance_passed']
-            record['accepted']=bool(literal and clean_receipt(literal) and not record.get('error') and record['provenance_passed'] and record['units_matched'] and record['fixtures_closing']['passed'] and record['all_original_environments_have_actual_results'])
+            record['accepted']=bool(literal and clean_receipt(literal) and not record.get('error') and record['provenance_passed'] and record['units_matched'] and record['fixtures_closing']['passed'] and record['attested_windows_OS_closing']['passed'] and record['all_original_environments_have_actual_results'])
             record['skip_count']=None;record['skip_count_availability']='Original per-environment verbose raw output retained; no fabricated zero count'
             tests.append(record);save(root/'TEST_RESULTS.json',tests)
     return {'tests':tests,'resolved_matrices':matrices,'expected_environment_count':32,'expected_mathematical_environment_count':17}

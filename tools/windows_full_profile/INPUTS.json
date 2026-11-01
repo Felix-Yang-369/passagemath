@@ -3032,7 +3032,7 @@
     "delvewheel==1.13.2",
     "Jinja2==3.1.6",
     "MarkupSafe==3.0.4",
-    "tox==4.67.4"
+    "tox==4.67.5"
   ],
   "source_build_requirement": "memory_allocator==0.1.4",
   "pkg_config_provider": "Normal MSYS2 mingw-w64 pkgconf package; no Python pkgconf wheel and no retagging"

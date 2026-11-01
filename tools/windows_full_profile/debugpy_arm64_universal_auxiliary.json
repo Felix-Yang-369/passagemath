@@ -1,0 +1,214 @@
+{
+  "schema": "proposed-official-debugpy-universal-ARM64-unused-auxiliaries-v1",
+  "distribution": "debugpy",
+  "version": "1.8.22",
+  "source_kind": "original official universal wheel selected by normal pip, not an ARM source build and not a retagged x64 wheel",
+  "wheel": {
+    "filename": "debugpy-1.8.22-py2.py3-none-any.whl",
+    "url": "https://files.pythonhosted.org/packages/56/3d/c7dc9f35bc9e22cdb53679f844bee40fd5cff871862f60595869a433400d/debugpy-1.8.22-py2.py3-none-any.whl",
+    "bytes": 5374857,
+    "sha256": "a9e9d3550e15ca479c59333e90845029190531f0cacfedab3b815a57bd913947",
+    "internal_tags": [
+      "py2-none-any",
+      "py3-none-any"
+    ],
+    "all_304_original_RECORD_rows_verified": true
+  },
+  "sdist_static_crosscheck": {
+    "filename": "debugpy-1.8.22.tar.gz",
+    "bytes": 1710877,
+    "sha256": "e489c7268e1c7b41e13b438d9c533d2a7af73fb59bf8cd30fead8286c1c39c4e",
+    "file_members": 296,
+    "PE_members": 0
+  },
+  "required_actual_target": {
+    "native_machine": "0xaa64",
+    "process_machine": 0,
+    "python_pe_machine": "0xaa64",
+    "emulation": false,
+    "version_major_minor": [
+      3,
+      12
+    ],
+    "cache_tag": "cpython-312",
+    "extension_suffixes": [
+      ".cp312-win_arm64.pyd",
+      ".pyd"
+    ]
+  },
+  "potential_auxiliary_files": [
+    {
+      "bytes": 332112,
+      "sha256": "0359fcf45dc31db859edd310f43eec072985a7d4a00fc493db1e5b9257cf86f0",
+      "pe_machine": "0x8664",
+      "original_wheel_RECORD_row": [
+        "debugpy/_vendored/pydevd/_pydevd_bundle/pydevd_cython.cp39-win_amd64.pyd",
+        "sha256=A1n89F3DHbhZ7dMQ9D7sBymFp9SgD8ST2x5bklfPhvA",
+        "332112"
+      ],
+      "relative_site_path": "debugpy/_vendored/pydevd/_pydevd_bundle/pydevd_cython.cp39-win_amd64.pyd",
+      "role": "incompatible CPython 3.9 x64 vendored extension",
+      "normal_ARM64_CP312_import_compatible": false,
+      "original_extension_suffix": ".cp39-win_amd64.pyd",
+      "normal_module_stem": "pydevd_cython"
+    },
+    {
+      "bytes": 153936,
+      "sha256": "3d4e6c523669d0b2e38f88821392818b62e0b206ce94d000a4998a4b131b16c2",
+      "pe_machine": "0x8664",
+      "original_wheel_RECORD_row": [
+        "debugpy/_vendored/pydevd/_pydevd_frame_eval/pydevd_frame_evaluator.cp39-win_amd64.pyd",
+        "sha256=PU5sUjZp0LLjj4iCE5KBi2LgsgbOlNAApJmKSxMbFsI",
+        "153936"
+      ],
+      "relative_site_path": "debugpy/_vendored/pydevd/_pydevd_frame_eval/pydevd_frame_evaluator.cp39-win_amd64.pyd",
+      "role": "incompatible CPython 3.9 x64 vendored extension",
+      "normal_ARM64_CP312_import_compatible": false,
+      "original_extension_suffix": ".cp39-win_amd64.pyd",
+      "normal_module_stem": "pydevd_frame_evaluator"
+    },
+    {
+      "bytes": 45904,
+      "sha256": "1d6ce5aac9fa5ab6e406d288738d78af95fd96884fe43738d178a2c76c65593e",
+      "pe_machine": "0x8664",
+      "original_wheel_RECORD_row": [
+        "debugpy/_vendored/pydevd/pydevd_attach_to_process/attach_amd64.dll",
+        "sha256=HWzlqsn6WrbkBtKIc414r5X9lohP5Dc40Xiix2xlWT4",
+        "45904"
+      ],
+      "relative_site_path": "debugpy/_vendored/pydevd/pydevd_attach_to_process/attach_amd64.dll",
+      "role": "explicit debugger attach helper, not a normal Python-import extension",
+      "normal_ARM64_CP312_import_compatible": false
+    },
+    {
+      "bytes": 41336,
+      "sha256": "5c52a795684f642e447a76f0da7415bfbd13a4614db881c2ddee6fe9b51656eb",
+      "pe_machine": "0x14c",
+      "original_wheel_RECORD_row": [
+        "debugpy/_vendored/pydevd/pydevd_attach_to_process/attach_x86.dll",
+        "sha256=XFKnlWhPZC5Eenbw2nQVv70TpGFNuIHC3e5v6bUWVus",
+        "41336"
+      ],
+      "relative_site_path": "debugpy/_vendored/pydevd/pydevd_attach_to_process/attach_x86.dll",
+      "role": "explicit debugger attach helper, not a normal Python-import extension",
+      "normal_ARM64_CP312_import_compatible": false
+    },
+    {
+      "bytes": 276344,
+      "sha256": "a524d9e29147eb1f1f184049c56dd04665b78167b054a21b04a52690f89ba353",
+      "pe_machine": "0x8664",
+      "original_wheel_RECORD_row": [
+        "debugpy/_vendored/pydevd/pydevd_attach_to_process/inject_dll_amd64.exe",
+        "sha256=pSTZ4pFH6x8fGEBJxW3QRmW3gWewVKIbBKUmkPibo1M",
+        "276344"
+      ],
+      "relative_site_path": "debugpy/_vendored/pydevd/pydevd_attach_to_process/inject_dll_amd64.exe",
+      "role": "explicit debugger attach helper, not a normal Python-import extension",
+      "normal_ARM64_CP312_import_compatible": false
+    },
+    {
+      "bytes": 220024,
+      "sha256": "22cfa457b4a6902c18f21e63e23aad855142720136f2c6e89bc7989b016a17f2",
+      "pe_machine": "0x14c",
+      "original_wheel_RECORD_row": [
+        "debugpy/_vendored/pydevd/pydevd_attach_to_process/inject_dll_x86.exe",
+        "sha256=Is-kV7SmkCwY8h5j4jqthVFCcgE28sbom8eYmwFqF_I",
+        "220024"
+      ],
+      "relative_site_path": "debugpy/_vendored/pydevd/pydevd_attach_to_process/inject_dll_x86.exe",
+      "role": "explicit debugger attach helper, not a normal Python-import extension",
+      "normal_ARM64_CP312_import_compatible": false
+    },
+    {
+      "bytes": 28024,
+      "sha256": "be90e835ac84864bf131dcd482e927341028c6dd2ae6fa86786b02315524e0d4",
+      "pe_machine": "0x8664",
+      "original_wheel_RECORD_row": [
+        "debugpy/_vendored/pydevd/pydevd_attach_to_process/run_code_on_dllmain_amd64.dll",
+        "sha256=vpDoNayEhkvxMdzUguknNBAoxt0q5vqGeGsCMVUk4NQ",
+        "28024"
+      ],
+      "relative_site_path": "debugpy/_vendored/pydevd/pydevd_attach_to_process/run_code_on_dllmain_amd64.dll",
+      "role": "explicit debugger attach helper, not a normal Python-import extension",
+      "normal_ARM64_CP312_import_compatible": false
+    },
+    {
+      "bytes": 24440,
+      "sha256": "f8004165cfe1e6494b70a49e733b180998e215cbfcc2176da1b9c272280282d8",
+      "pe_machine": "0x14c",
+      "original_wheel_RECORD_row": [
+        "debugpy/_vendored/pydevd/pydevd_attach_to_process/run_code_on_dllmain_x86.dll",
+        "sha256=-ABBZc_h5klLcKSeczsYCZjiFcv8whdtobnCcigCgtg",
+        "24440"
+      ],
+      "relative_site_path": "debugpy/_vendored/pydevd/pydevd_attach_to_process/run_code_on_dllmain_x86.dll",
+      "role": "explicit debugger attach helper, not a normal Python-import extension",
+      "normal_ARM64_CP312_import_compatible": false
+    }
+  ],
+  "comparison_to_separate_x64_specific_six": [
+    {
+      "path": "debugpy/_vendored/pydevd/pydevd_attach_to_process/attach_amd64.dll",
+      "same_PE_machine": true,
+      "same_bytes": false,
+      "previous_x64_specific_sha256": "e3413fa56453a33c55b759a8e3bf564768d6ce2cc155b3f608c707b5a9c9bbf5",
+      "universal_sha256": "1d6ce5aac9fa5ab6e406d288738d78af95fd96884fe43738d178a2c76c65593e"
+    },
+    {
+      "path": "debugpy/_vendored/pydevd/pydevd_attach_to_process/attach_x86.dll",
+      "same_PE_machine": true,
+      "same_bytes": false,
+      "previous_x64_specific_sha256": "68092a75b41d9637f14f032049ef3ffbd1000200d0e139f8d0822ccf9c60c1ea",
+      "universal_sha256": "5c52a795684f642e447a76f0da7415bfbd13a4614db881c2ddee6fe9b51656eb"
+    },
+    {
+      "path": "debugpy/_vendored/pydevd/pydevd_attach_to_process/inject_dll_amd64.exe",
+      "same_PE_machine": true,
+      "same_bytes": false,
+      "previous_x64_specific_sha256": "4e602b4b072737105dd696b6aae8f8de7316b107ae501905e6f361f63ac41bdc",
+      "universal_sha256": "a524d9e29147eb1f1f184049c56dd04665b78167b054a21b04a52690f89ba353"
+    },
+    {
+      "path": "debugpy/_vendored/pydevd/pydevd_attach_to_process/inject_dll_x86.exe",
+      "same_PE_machine": true,
+      "same_bytes": false,
+      "previous_x64_specific_sha256": "e12e90e22d8a66806fcf0d84e713485b740933d2c9ba5dd0beeba8b6d0ccafbf",
+      "universal_sha256": "22cfa457b4a6902c18f21e63e23aad855142720136f2c6e89bc7989b016a17f2"
+    },
+    {
+      "path": "debugpy/_vendored/pydevd/pydevd_attach_to_process/run_code_on_dllmain_amd64.dll",
+      "same_PE_machine": true,
+      "same_bytes": false,
+      "previous_x64_specific_sha256": "54335e10db9155c9a04c22ecbebbbfe9396bef2d1995d06d9203b9dcf8325b52",
+      "universal_sha256": "be90e835ac84864bf131dcd482e927341028c6dd2ae6fa86786b02315524e0d4"
+    },
+    {
+      "path": "debugpy/_vendored/pydevd/pydevd_attach_to_process/run_code_on_dllmain_x86.dll",
+      "same_PE_machine": true,
+      "same_bytes": false,
+      "previous_x64_specific_sha256": "318234915106b7ed26aa2098a12de44dfa762888e64ddc646f634c32c8f85da5",
+      "universal_sha256": "f8004165cfe1e6494b70a49e733b180998e215cbfcc2176da1b9c272280282d8"
+    }
+  ],
+  "normal_import_source_files": [
+    {
+      "path": "pydevd_cython_wrapper.py",
+      "bytes": 1913,
+      "sha256": "13f6addba03411fc786d7198721da0cea1690f1eca3ddbb85cd50430e5290781"
+    },
+    {
+      "path": "pydevd_frame_eval_main.py",
+      "bytes": 2515,
+      "sha256": "1c776b00f6029cded71c14bbf0733c6ab3ee5b0b549af279ee7580f988bf8016"
+    },
+    {
+      "path": "pydevd_trace_dispatch.py",
+      "bytes": 4009,
+      "sha256": "b41a5169075253d39a13e135f756d86023011c93fc104c3576bc6ed26325ed1d"
+    }
+  ],
+  "acceptance_requires": "Each current PRE/BASH_PRE/POST process must independently prove native ARM64 CPython, exact installed member and RECORD/official source bindings, and a complete actually loaded inventory excluding every proposed auxiliary. No core/candidate extension or unknown/changed/loaded file is admitted.",
+  "R5_R6_actual_installed_hash_RECORD_and_loaded_inventory_available": false,
+  "R5_R6_retroactive_PRE_acceptance": false,
+  "proposal_only_not_integrated_into_R7": true
+}

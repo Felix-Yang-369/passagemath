@@ -8,6 +8,7 @@ from ctypes import wintypes as w
 import hashlib
 import importlib
 import importlib.metadata
+import importlib.util
 import io
 import json
 import os
@@ -20,6 +21,20 @@ import sys
 
 def digest(data):return hashlib.sha256(data).hexdigest()
 def canonical(name):return re.sub(r'[-_.]+','-',name).lower()
+
+def load_trusted_sibling_helpers():
+    """Load only validation helpers by exact path under isolated Python (-I).
+
+    The helper directory is never added to scientific import search paths.
+    """
+    before=list(sys.path);root=Path(__file__).resolve().parent
+    for name in ('os_provider_contract','debugpy_universal_auxiliary'):
+        path=root/(name+'.py')
+        spec=importlib.util.spec_from_file_location(name,path)
+        module=importlib.util.module_from_spec(spec);spec.loader.exec_module(module)
+        sys.modules[name]=module
+        assert Path(module.__file__).resolve()==path
+    assert sys.path==before
 
 def original_notest_phase(package,extras,contract_sha256,source_bytes,environment,require_bash):
     allowed=('categories','cddlib','cliquer','cmr','combinat','graphs','gsl','highs','homfly','modules','planarity','plot','rankwidth')
@@ -159,9 +174,11 @@ def declared_dependency_graph(distributions,package,requested_extras=None):
             edges.append({'from':name,'from_extra':extra,'requirement':raw,'to':dependency,'actual_version':by_name[dependency].version})
             pending.append((dependency,''));pending.extend((dependency,e) for e in requirement.extras)
     return {name for name,extra in visited},edges
-def main():
-    ap=argparse.ArgumentParser();ap.add_argument('--package',required=True);ap.add_argument('--import-module',action='append',default=[]);ap.add_argument('--wheel-manifests',type=Path,required=True);ap.add_argument('--provider-manifest',type=Path,required=True);ap.add_argument('--machine',required=True);ap.add_argument('--require-bash-resolution',action='store_true');ap.add_argument('--original-import-only-contract-sha256');ap.add_argument('--original-notest-contract-sha256');ap.add_argument('--requested-extras-json',default='["test"]');ap.add_argument('--expected-known-failures',type=Path);ap.add_argument('--output',type=Path,required=True);args=ap.parse_args()
+def _validate(args,early_inventory):
+    from os_provider_contract import defender,record,validate_declaration,attest_declared,snapshot_loaded,save
     assert sys.platform=='win32'
+    native_identity=defender().native_process_identity()
+    assert native_identity['native_machine']==int(args.machine,16)
     prefix=Path(sys.prefix).resolve();base=Path(sys.base_prefix).resolve();site=(prefix/'Lib/site-packages').resolve()
     assert prefix!=base and sys.version_info[:3]==(3,12,10)
     assert Path(os.environ['HOME']).resolve()==prefix and os.environ['SAGE_DOC']=='/doesnotexist'
@@ -176,6 +193,9 @@ def main():
     for item in sys.path:
         assert item and (Path(item).resolve().is_relative_to(prefix) or Path(item).resolve().is_relative_to(base)),('foreign Python import path',item)
     manifests=json.loads(args.wheel_manifests.read_text());providers=json.loads(args.provider_manifest.read_text())
+    os_declaration=providers['attested_windows_defender_components']
+    validate_declaration(os_declaration,int(args.machine,16),args.output.parent)
+    assert record(args.output.parent/'ATTESTED_WINDOWS_OS_PROVIDERS.json')==providers['attested_windows_defender_declaration_file']
     debugger_manifest=load_debugger_auxiliary_manifest(Path(__file__).resolve().parent/'debugpy_native_auxiliary.json')
     expected={}
     for manifest in manifests:
@@ -206,13 +226,16 @@ def main():
             auxiliary=None
             if path.is_relative_to(site):
                 auxiliary=debugger_auxiliary_record(debugger_manifest,name,version,str(path.relative_to(site)).replace('\\','/'),data,args.machine)
+                if auxiliary is None:
+                    from debugpy_universal_auxiliary import universal_auxiliary_record
+                    auxiliary=universal_auxiliary_record(site,canonical(name),version,str(path.relative_to(site)).replace('\\','/'),data,args.machine,native_identity,early_inventory)
                 if auxiliary is not None:debugger_auxiliaries.append(dict(auxiliary,path=str(path),observed_loaded_in_provenance_process=False))
             if path.suffix.lower() in ('.pyd','.dll'):
                 offset=struct.unpack_from('<I',data,0x3c)[0]
                 assert data[:2]==b'MZ' and data[offset:offset+4]==b'PE\0\0'
                 actual_machine=hex(struct.unpack_from('<H',data,offset+4)[0])
-                if actual_machine!=args.machine:assert path.suffix.lower()=='.dll' and auxiliary is not None,('Installed native dependency PE mismatch',str(path))
-                installed_native.append({'path':str(path),'distribution':name,'version':version,'sha256':digest256,'pe_machine':actual_machine,'provider_class':'unloaded_official_debugger_attachment_auxiliary' if actual_machine!=args.machine else 'normal_installed_native_provider','native_target_verified':actual_machine==args.machine})
+                if actual_machine!=args.machine:assert auxiliary is not None and (path.suffix.lower()=='.dll' or auxiliary.get('provider_class')=='unloaded_official_debugger_foreign_ABI_auxiliary'),('Installed native dependency PE mismatch',str(path))
+                installed_native.append({'path':str(path),'distribution':name,'version':version,'sha256':digest256,'pe_machine':actual_machine,'provider_class':auxiliary['provider_class'] if actual_machine!=args.machine else 'normal_installed_native_provider','native_target_verified':actual_machine==args.machine})
             if key in records and records[key]['sha256']!=digest256:raise AssertionError('Conflicting installed distribution owners')
             records[key]={'sha256':digest256,'distribution':name,'version':version};count+=1
             if path.is_relative_to(site):
@@ -242,15 +265,13 @@ def main():
     kernel.IsWow64Process2.argtypes=[w.HANDLE,ctypes.POINTER(w.WORD),ctypes.POINTER(w.WORD)];kernel.IsWow64Process2.restype=w.BOOL
     process_machine=w.WORD();native_machine=w.WORD();assert kernel.IsWow64Process2(process,ctypes.byref(process_machine),ctypes.byref(native_machine))
     assert process_machine.value==0 and native_machine.value==int(args.machine,16),('Mathematical tox CPython emulation/target mismatch',process_machine.value,native_machine.value)
-    psapi.EnumProcessModulesEx.argtypes=[w.HANDLE,ctypes.POINTER(w.HMODULE),w.DWORD,ctypes.POINTER(w.DWORD),w.DWORD];psapi.EnumProcessModulesEx.restype=w.BOOL
-    psapi.GetModuleFileNameExW.argtypes=[w.HANDLE,w.HMODULE,w.LPWSTR,w.DWORD];psapi.GetModuleFileNameExW.restype=w.DWORD
-    modules=(w.HMODULE*8192)();needed=w.DWORD()
-    assert psapi.EnumProcessModulesEx(process,modules,ctypes.sizeof(modules),ctypes.byref(needed),3) and needed.value<=ctypes.sizeof(modules)
-    loaded=[];sage_native=0
-    for handle in modules[:needed.value//ctypes.sizeof(w.HMODULE)]:
-        buffer=ctypes.create_unicode_buffer(32768);assert psapi.GetModuleFileNameExW(process,handle,buffer,len(buffer))
-        path=Path(buffer.value).resolve();data=path.read_bytes();offset=struct.unpack_from('<I',data,0x3c)[0];assert data[offset:offset+4]==b'PE\0\0'
+    actual_inventory=snapshot_loaded(Path(str(args.output)+'.LOADED_BEFORE_CLASSIFICATION.json'),early_inventory['phase'])
+    assert actual_inventory['complete'] is True,'Actual loaded inventory contains unresolved path/hash/PE errors'
+    loaded=[];sage_native=0;unknown=[];os_attestations=[]
+    for observed in actual_inventory['entries']:
+        path=Path(observed['path']).resolve();data=path.read_bytes();offset=struct.unpack_from('<I',data,0x3c)[0];assert data[offset:offset+4]==b'PE\0\0'
         machine=struct.unpack_from('<H',data,offset+4)[0];value=digest(data);key=str(path).casefold();relative=None
+        assert value==observed['sha256'] and machine==observed['pe_machine'],('Loaded native inventory changed before classification',str(path))
         if path.is_relative_to(site):
             assert key in records and records[key]['sha256']==value
             relative=str(path.relative_to(site));local=relative.casefold()
@@ -265,8 +286,17 @@ def main():
             assert key in declared and declared[key]['sha256']==value,('undeclared native provider',str(path))
             assert machine==int(args.machine,16)
             kind='base_CPython' if path.is_relative_to(base) else 'declared_SDK' if path.is_relative_to(sdk) else 'normal_MSYS2_runtime'
-        else:raise AssertionError('Loaded native provider outside all declared roots: '+str(path))
+        elif key in os_declaration['pins']:
+            evidence=args.output.parent/'os-attestation/child'/args.output.name/hashlib.sha256(key.encode()).hexdigest()[:16]
+            attestation=attest_declared(path,os_declaration,int(args.machine,16),evidence)
+            assert machine==int(args.machine,16)
+            kind='Windows_OS_Defender_MpOAV_attested';os_attestations.append(record(evidence/'ATTESTATION.json'))
+        else:
+            unknown.append({'path':str(path),'sha256':value,'pe_machine':hex(machine),'error':'Loaded native provider outside all declared roots'})
+            kind='unknown_rejected_native_provider'
         loaded.append({'path':str(path),'relative_site_path':relative,'sha256':value,'pe_machine':hex(machine),'provider_class':kind})
+    save(Path(str(args.output)+'.LOADED_CLASSIFICATION.json'),{'complete_observable_inventory':actual_inventory,'classified':loaded,'unknown_rejected':unknown,'OS_component_attestations':os_attestations,'passed':not unknown})
+    assert not unknown,('Loaded native providers outside all declared roots',unknown)
     foreign_debugger_auxiliaries=[row for row in debugger_auxiliaries if row['pe_machine']!=args.machine]
     require_unloaded_debugger_auxiliaries(foreign_debugger_auxiliaries,[row['path'] for row in loaded])
     consumption=native_consumption_contract(args.package,args.import_module,args.original_import_only_contract_sha256,sage_native,args.require_bash_resolution,notest_phase)
@@ -275,10 +305,12 @@ def main():
     result['all_installed_native_PE_files']=installed_native
     result['unloaded_cross_architecture_official_debugger_auxiliaries']=foreign_debugger_auxiliaries
     result['declared_debugger_auxiliary_manifest_sha256']='029cf773201bd7e927bd835c4d1466843e59f3815debebd85fc3b070b1f4370a'
-    result['native_file_inventory_scope']='Every installed .pyd/.dll is checked. Only exact official debugger-attachment DLLs may differ while unloaded; all candidate Python extensions and all actually loaded non-OS files retain the native target machine.'
+    result['declared_ARM64_universal_debugger_auxiliary_manifest_sha256']='c29e633a7efc39a16a5b443b404995f8aa5b6dd7b3c3e194a290fd73a83ef9a6'
+    result['native_file_inventory_scope']='Every installed .pyd/.dll is checked. Exact official unloaded debugger attachment files and the exact ARM64 CPython 3.12-incompatible vendored CPython 3.9 extensions have separately pinned rules; all candidate/current-ABI Python extensions and all actually loaded non-OS files retain the native target machine.'
     result['native_consumption_contract']=consumption
     result['original_effective_tox_extras']=extras;result['expected_original_known_failures']=str(expected_known)
     result['declared_OS_system_subtrees']=[str(p) for p in os_roots]
+    result['attested_windows_defender_components']={'same_run_declaration':providers['attested_windows_defender_declaration_file'],'actual_phase_attestations':os_attestations,'provider_class':'Windows_OS_Defender_MpOAV_attested'}
     result['complete_installed_candidate_wheel_members']=installed_complete
     if args.require_bash_resolution:
         python=Path(os.environ['PROFILE_BASH_PYTHON']).resolve();runner=Path(os.environ['PROFILE_BASH_SAGE_RUNTESTS']).resolve()
@@ -294,5 +326,27 @@ def main():
         result['original_bash_resolution']={'passed':True,'python':str(python),'python_sha256':digest(python.read_bytes()),'sage_runtests':str(runner),'sage_runtests_sha256':digest(data),'sage_runtests_PE_machine':runner_pe,'sage_runtests_RECORD_owner':records[runner_key],'native_Python_process_machine':process_machine.value,'native_Python_host_machine':hex(native_machine.value),'unmodified_original_math_command':True}
     args.output.write_text(json.dumps(result,indent=2)+'\n',encoding='utf-8');print('CHILD_PROVENANCE_JSON '+json.dumps(result),flush=True)
     return 0
+
+def main():
+    load_trusted_sibling_helpers()
+    ap=argparse.ArgumentParser();ap.add_argument('--package',required=True);ap.add_argument('--import-module',action='append',default=[]);ap.add_argument('--wheel-manifests',type=Path,required=True);ap.add_argument('--provider-manifest',type=Path,required=True);ap.add_argument('--machine',required=True);ap.add_argument('--require-bash-resolution',action='store_true');ap.add_argument('--original-import-only-contract-sha256');ap.add_argument('--original-notest-contract-sha256');ap.add_argument('--requested-extras-json',default='["test"]');ap.add_argument('--expected-known-failures',type=Path);ap.add_argument('--output',type=Path,required=True);args=ap.parse_args()
+    from os_provider_contract import snapshot_loaded,save
+    phase='BASH_PRE' if args.require_bash_resolution else 'POST' if 'POST' in args.output.name.upper() else 'PRE'
+    error=None
+    try:
+        early=snapshot_loaded(Path(str(args.output)+'.LOADED_AT_ENTRY.json'),phase)
+        assert early['complete'] is True,'Entry loaded inventory contains unresolved metadata'
+        return _validate(args,early)
+    except BaseException as failure:
+        error={'type':type(failure).__name__,'message':str(failure)}
+        save(Path(str(args.output)+'.ERROR.json'),{'passed':False,'phase':phase,'error':error})
+        raise
+    finally:
+        try:
+            final=snapshot_loaded(Path(str(args.output)+'.LOADED_AT_EXIT.json'),phase)
+            if final['complete'] is not True and error is None:raise AssertionError('Exit loaded inventory contains unresolved metadata')
+        except BaseException as failure:
+            save(Path(str(args.output)+'.FINAL_INVENTORY_ERROR.json'),{'passed':False,'error':str(failure),'original_error':error})
+            if error is None:raise
 
 if __name__=='__main__':raise SystemExit(main())
